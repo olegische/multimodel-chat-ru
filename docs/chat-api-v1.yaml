@@ -1,0 +1,86 @@
+openapi: 3.0.0
+info:
+  title: Chat API
+  description: API для общения с Yandex GPT и хранения контекста беседы.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api
+    description: Локальный сервер для разработки
+
+paths:
+  /messages:
+    get:
+      summary: Получить историю сообщений
+      description: Возвращает историю сообщений текущего чата.
+      operationId: getChatHistory
+      responses:
+        '200':
+          description: История сообщений успешно загружена
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user:
+                      type: string
+                      description: Имя пользователя, отправившего сообщение.
+                    message:
+                      type: string
+                      description: Текст сообщения.
+                    timestamp:
+                      type: string
+                      format: date-time
+                      description: Время отправки сообщения.
+        '500':
+          description: Ошибка сервера
+
+    post:
+      summary: Отправить сообщение
+      description: Отправляет сообщение пользователя и получает ответ от Yandex GPT API.
+      operationId: sendMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: Сообщение пользователя.
+                settings:
+                  type: object
+                  properties:
+                    temperature:
+                      type: number
+                      description: Температура генерации ответа.
+                      example: 0.7
+                    max_tokens:
+                      type: integer
+                      description: Максимальное количество токенов в ответе.
+                      example: 150
+              required:
+                - text
+                - settings
+      responses:
+        '200':
+          description: Ответ от Yandex GPT успешно получен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: string
+                    description: Ответ от GPT.
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: Время получения ответа от GPT.
+        '400':
+          description: Неверный запрос
+        '500':
+          description: Ошибка сервера
