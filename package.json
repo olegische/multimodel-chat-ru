@@ -1,26 +1,36 @@
 {
-  "name": "multimodel-chat-ru",
+  "name": "multimodel-chat",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "react": "19.0.0-rc-66855b96-20241106",
-    "react-dom": "19.0.0-rc-66855b96-20241106",
-    "next": "15.0.3"
+    "@prisma/client": "^5.22.0",
+    "next": "14.x",
+    "react": "18.x",
+    "react-dom": "18.x",
+    "zod": "^3.x"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "eslint": "^8",
-    "eslint-config-next": "15.0.3"
+    "@types/node": "^20.x",
+    "@types/react": "^18.x",
+    "@types/react-dom": "^18.x",
+    "@typescript-eslint/eslint-plugin": "^6.x",
+    "@typescript-eslint/parser": "^6.x",
+    "autoprefixer": "^10.x",
+    "eslint": "^8.x",
+    "eslint-config-next": "14.x",
+    "eslint-config-prettier": "^9.x",
+    "postcss": "^8.x",
+    "prettier": "^3.x",
+    "prisma": "^5.22.0",
+    "tailwindcss": "^3.x",
+    "typescript": "^5.x"
   }
 }
