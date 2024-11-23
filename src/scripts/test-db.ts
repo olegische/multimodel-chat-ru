@@ -15,8 +15,7 @@ async function main() {
         message: 'Тестовое сообщение',
         response: 'Тестовый ответ от GPT',
         temperature: 0.7,
-        maxTokens: 1000,
-        timestamp: new Date()
+        maxTokens: 1000
       }
     })
     console.log('✅ Тестовое сообщение создано:', message)

@@ -9,7 +9,7 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
-    "test:db": "node --loader ts-node/esm --experimental-specifier-resolution=node src/scripts/test-db.ts"
+    "test:db": "tsx src/scripts/test-db.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -33,6 +33,7 @@
     "prettier": "^3.x",
     "tailwindcss": "^3.x",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.x"
   },
   "type": "module",
