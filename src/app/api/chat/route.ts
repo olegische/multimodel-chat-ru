@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prismaClient from '@/lib/db';
+import { generateResponse } from '@/lib/yandexGpt';
 import { z } from 'zod';
 
 // Схема валидации входящего запроса
@@ -7,6 +8,7 @@ const chatRequestSchema = z.object({
   message: z.string().min(1),
   temperature: z.number().min(0).max(1).default(0.7),
   maxTokens: z.number().min(1).max(2000).default(1000),
+  chatId: z.string().optional() // Опциональный параметр для продолжения существующего чата
 });
 
 export async function POST(request: Request) {
@@ -14,15 +16,34 @@ export async function POST(request: Request) {
     const body = await request.json();
     
     // Валидация входящих данных
-    const { message, temperature, maxTokens } = chatRequestSchema.parse(body);
+    const { message, temperature, maxTokens, chatId } = chatRequestSchema.parse(body);
 
-    // Создаем новый чат, если не передан chatId
-    const chat = await prismaClient.chat.create({
-      data: {}
+    // Получаем или создаем чат
+    const chat = chatId 
+      ? await prismaClient.chat.findUnique({ where: { id: chatId } })
+      : await prismaClient.chat.create({ data: {} });
+
+    if (!chat) {
+      return NextResponse.json(
+        { success: false, error: 'Chat not found' },
+        { status: 404 }
+      );
+    }
+
+    // Получаем контекст предыдущих сообщений
+    const previousMessages = await prismaClient.message.findMany({
+      where: { chatId: chat.id },
+      orderBy: { timestamp: 'asc' },
+      take: 10 // Ограничиваем контекст последними 10 сообщениями
     });
 
-    // Здесь будет вызов Yandex GPT API
-    const gptResponse = "Временный ответ от GPT"; // TODO: Реализовать вызов GPT API
+    // Получаем ответ от GPT с учетом контекста
+    const gptResponse = await generateResponse(
+      message,
+      temperature,
+      maxTokens,
+      previousMessages
+    );
 
     // Сохраняем сообщение в БД
     const savedMessage = await prismaClient.message.create({
@@ -31,17 +52,28 @@ export async function POST(request: Request) {
         message: message,
         response: gptResponse,
         temperature,
-        maxTokens,
+        maxTokens
       }
     });
 
     return NextResponse.json({
       success: true,
-      data: savedMessage
+      data: {
+        message: savedMessage,
+        chatId: chat.id
+      }
     });
 
   } catch (error) {
     console.error('Error in chat endpoint:', error);
+    
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid request data', details: error.errors },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { success: false, error: 'Internal Server Error' },
       { status: 500 }

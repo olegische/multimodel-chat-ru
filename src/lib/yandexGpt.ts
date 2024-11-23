@@ -1,3 +1,4 @@
+import { Message } from '@prisma/client';
 import { z } from 'zod';
 
 const GPT_API_URL = process.env.YANDEX_GPT_API_URL!;
@@ -25,23 +26,36 @@ const gptResponseSchema = z.object({
 export async function generateResponse(
   message: string,
   temperature: number = 0.7,
-  maxTokens: number = 1000
+  maxTokens: number = 1000,
+  previousMessages: Message[] = []
 ) {
   try {
+    // Формируем контекст из предыдущих сообщений
+    const context = previousMessages.map(msg => [
+      { role: 'user', text: msg.message },
+      { role: 'assistant', text: msg.response }
+    ]).flat();
+
     const response = await fetch(GPT_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${IAM_TOKEN}`
+        'Authorization': `Bearer ${IAM_TOKEN}`,
+        'x-folder-id': FOLDER_ID
       },
       body: JSON.stringify({
         modelUri: `gpt://${FOLDER_ID}/yandexgpt`,
         completionOptions: {
           stream: false,
           temperature,
-          maxTokens
+          maxTokens: `${maxTokens}`
         },
         messages: [
+          {
+            role: 'system',
+            text: 'Ты — умный ассистент, который помогает пользователям.'
+          },
+          ...context,
           {
             role: 'user',
             text: message
