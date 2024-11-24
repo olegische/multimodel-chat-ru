@@ -1,15 +1,26 @@
 import { Message } from '@prisma/client';
 import { z } from 'zod';
 
-const GPT_API_URL = process.env.YANDEX_GPT_API_URL!;
-const IAM_TOKEN = process.env.YANDEX_IAM_TOKEN!;
-const FOLDER_ID = process.env.YANDEX_FOLDER_ID!;
-
-if (!GPT_API_URL || !IAM_TOKEN || !FOLDER_ID) {
-  throw new Error('Yandex GPT API configuration is missing');
+// Types
+interface YandexGPTConfig {
+  apiUrl: string;
+  iamToken: string;
+  folderId: string;
 }
 
-// Схема валидации ответа от API
+interface GPTMessage {
+  role: string;
+  text: string;
+}
+
+// Constants
+const DEFAULT_CONFIG = {
+  temperature: 0.7,
+  maxTokens: 1000,
+  systemPrompt: 'Ты — умный ассистент, который помогает пользователям.'
+} as const;
+
+// Validation schemas
 const gptResponseSchema = z.object({
   result: z.object({
     alternatives: z.array(
@@ -23,49 +34,67 @@ const gptResponseSchema = z.object({
   })
 });
 
+// Config initialization
+const getConfig = (): YandexGPTConfig => {
+  const config = {
+    apiUrl: process.env.YANDEX_GPT_API_URL,
+    iamToken: process.env.YANDEX_IAM_TOKEN,
+    folderId: process.env.YANDEX_FOLDER_ID,
+  };
+
+  if (!config.apiUrl || !config.iamToken || !config.folderId) {
+    throw new Error('Yandex GPT API configuration is missing');
+  }
+
+  return config as YandexGPTConfig;
+};
+
+const formatMessages = (
+  message: string,
+  previousMessages: Message[],
+): GPTMessage[] => {
+  const context = previousMessages.map(msg => [
+    { role: 'user', text: msg.content },
+    { role: 'assistant', text: msg.content } // Предполагаем, что ответ тоже находится в content
+  ]).flat();
+
+  return [
+    { role: 'system', text: DEFAULT_CONFIG.systemPrompt },
+    ...context,
+    { role: 'user', text: message }
+  ];
+};
+
 export async function generateResponse(
   message: string,
-  temperature: number = 0.7,
-  maxTokens: number = 1000,
+  temperature: number = DEFAULT_CONFIG.temperature,
+  maxTokens: number = DEFAULT_CONFIG.maxTokens,
   previousMessages: Message[] = []
 ) {
-  try {
-    // Формируем контекст из предыдущих сообщений
-    const context = previousMessages.map(msg => [
-      { role: 'user', text: msg.message },
-      { role: 'assistant', text: msg.response }
-    ]).flat();
+  const config = getConfig();
 
-    const response = await fetch(GPT_API_URL, {
+  try {
+    const response = await fetch(config.apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${IAM_TOKEN}`,
-        'x-folder-id': FOLDER_ID
+        'Authorization': `Bearer ${config.iamToken}`,
+        'x-folder-id': config.folderId
       },
       body: JSON.stringify({
-        modelUri: `gpt://${FOLDER_ID}/yandexgpt`,
+        modelUri: `gpt://${config.folderId}/yandexgpt/rc`,
         completionOptions: {
           stream: false,
           temperature,
           maxTokens: `${maxTokens}`
         },
-        messages: [
-          {
-            role: 'system',
-            text: 'Ты — умный ассистент, который помогает пользователям.'
-          },
-          ...context,
-          {
-            role: 'user',
-            text: message
-          }
-        ]
+        messages: formatMessages(message, previousMessages)
       })
     });
 
     if (!response.ok) {
-      throw new Error(`GPT API error: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`GPT API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
@@ -75,6 +104,8 @@ export async function generateResponse(
 
   } catch (error) {
     console.error('Error calling Yandex GPT API:', error);
-    throw error;
+    throw error instanceof Error 
+      ? error 
+      : new Error('Unknown error occurred while calling Yandex GPT API');
   }
 } 

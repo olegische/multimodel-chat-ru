@@ -43,9 +43,9 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 relative">
       <Header />
-      <main className="flex-1 mt-16 mb-16 max-w-5xl mx-auto w-full">
+      <main className="flex-1 overflow-hidden mt-16 max-w-5xl mx-auto w-full">
         <ChatWindow messages={messages} loading={loading} />
       </main>
       <Footer onSendMessage={handleSendMessage} disabled={loading} />
