@@ -1,4 +1,3 @@
-import { Message } from '@prisma/client';
 import { z } from 'zod';
 
 // Types
@@ -11,6 +10,12 @@ interface YandexGPTConfig {
 interface GPTMessage {
   role: string;
   text: string;
+}
+
+// Добавим интерфейс для сообщений из БД
+interface DBMessage {
+  message: string;
+  response: string | null;
 }
 
 // Available models configuration
@@ -89,8 +94,8 @@ const formatMessages = (message: string, context: GPTMessage[]): GPTMessage[] =>
   ];
 };
 
-// Добавим функцию преобразования сообщений из БД в формат GPTMessage
-const convertToGPTMessages = (dbMessages: any[]): GPTMessage[] => {
+// Заменим any на конкретный тип
+const convertToGPTMessages = (dbMessages: DBMessage[]): GPTMessage[] => {
   return dbMessages.map(msg => ({
     role: msg.response ? 'assistant' : 'user',
     text: msg.response || msg.message
@@ -99,7 +104,7 @@ const convertToGPTMessages = (dbMessages: any[]): GPTMessage[] => {
 
 export async function generateResponse(
   message: string,
-  previousMessages: any[],
+  previousMessages: DBMessage[],
   temperature?: number,
   maxTokens?: number
 ): Promise<string> {
