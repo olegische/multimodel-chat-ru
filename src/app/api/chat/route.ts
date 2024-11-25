@@ -41,10 +41,9 @@ export async function POST(request: Request) {
     // Получаем ответ от GPT с учетом контекста
     const gptResponse = await generateResponse(
       message,
-      model as YandexGPTModel,
+      previousMessages,
       temperature,
-      maxTokens,
-      previousMessages
+      maxTokens
     );
 
     // Сохраняем сообщение в БД
