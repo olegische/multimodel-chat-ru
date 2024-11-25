@@ -16,7 +16,10 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleSendMessage = async (message: string) => {
+  const handleSendMessage = async (
+    message: string, 
+    settings: { temperature: number; maxTokens: number }
+  ) => {
     setLoading(true);
     try {
       const response = await fetch('/api/chat', {
@@ -26,8 +29,8 @@ export default function Home() {
         },
         body: JSON.stringify({
           message,
-          temperature: 0.7,
-          maxTokens: 1000,
+          temperature: settings.temperature,
+          maxTokens: settings.maxTokens,
         }),
       });
 

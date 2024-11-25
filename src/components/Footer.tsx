@@ -1,26 +1,38 @@
 'use client';
 
 import { useState } from 'react';
+import GenerationSettings from './GenerationSettings';
 
 interface FooterProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, settings: { temperature: number; maxTokens: number }) => void;
   disabled?: boolean;
 }
 
 export default function Footer({ onSendMessage, disabled = false }: FooterProps) {
   const [message, setMessage] = useState('');
+  const [settings, setSettings] = useState({
+    temperature: 0.7,
+    maxTokens: 1000
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && !disabled) {
-      onSendMessage(message);
+      onSendMessage(message, settings);
       setMessage('');
     }
   };
 
   return (
     <footer className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-      <form onSubmit={handleSubmit} className="max-w-5xl mx-auto p-4">
+      <form onSubmit={handleSubmit} className="max-w-5xl mx-auto p-4 space-y-4">
+        <GenerationSettings
+          temperature={settings.temperature}
+          maxTokens={settings.maxTokens}
+          onSettingsChange={setSettings}
+          disabled={disabled}
+        />
+        
         <div className="flex gap-2">
           <input
             type="text"
