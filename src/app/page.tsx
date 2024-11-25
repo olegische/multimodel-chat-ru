@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Header from '@/components/Header';
 import ChatWindow from '@/components/ChatWindow';
 import Footer from '@/components/Footer';
-import { YandexGPTModel, YANDEX_GPT_MODELS } from '@/lib/yandexGpt';
+import { YandexGPTModel } from '@/lib/yandexGpt';
 
 interface Message {
   id: number;
