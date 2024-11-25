@@ -76,18 +76,15 @@ const getConfig = (): YandexGPTConfig => {
   return config as YandexGPTConfig;
 };
 
-const formatMessages = (
-  message: string,
-  previousMessages: Message[],
-): GPTMessage[] => {
-  const context = previousMessages.map(msg => [
-    { role: 'user', text: msg.message },
-    { role: 'assistant', text: msg.response }
-  ]).flat();
+const formatMessages = (message: string, context: GPTMessage[]): GPTMessage[] => {
+  const validContext = context.map(msg => ({
+    role: msg.role,
+    text: msg.text || ''
+  }));
 
   return [
     { role: 'system', text: DEFAULT_CONFIG.systemPrompt },
-    ...context,
+    ...validContext,
     { role: 'user', text: message }
   ];
 };
