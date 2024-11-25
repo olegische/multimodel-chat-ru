@@ -72,15 +72,15 @@ else
 fi
 
 # Настройка systemd сервиса
-if ! check_file "/etc/systemd/system/multimodel-chat.service"; then
-    echo "Настройка systemd сервиса..."
-    cp scripts/multimodel-chat.service /etc/systemd/system/
-    systemctl daemon-reload
-    systemctl enable multimodel-chat
-    systemctl start multimodel-chat
-else
-    echo "Служба multimodel-chat уже настроена"
-fi
+# if ! check_file "/etc/systemd/system/multimodel-chat.service"; then
+#     echo "Настройка systemd сервиса..."
+#     cp scripts/multimodel-chat.service /etc/systemd/system/
+#     systemctl daemon-reload
+#     systemctl enable multimodel-chat
+#     systemctl start multimodel-chat
+# else
+#     echo "Служба multimodel-chat уже настроена"
+# fi
 
 echo "Установка завершена!"
 echo "Проверьте работу приложения по адресу http://localhost" 

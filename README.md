@@ -41,22 +41,8 @@ vi .env
 ./scripts/start.sh  # Запуск приложения
 ```
 
-## Проверка работоспособности
-
-1. Проверка статуса службы:
-```bash
-systemctl status multimodel-chat
-```
-
-2. Просмотр логов:
-```bash
-journalctl -u multimodel-chat -f
-```
-
 ## Полезные команды
 
-- Перезапуск приложения: `systemctl restart multimodel-chat`
-- Остановка приложения: `systemctl stop multimodel-chat`
 - Просмотр логов nginx: `tail -f /var/log/nginx/error.log`
 - Проверка порта: `netstat -tulpn | grep 3000`
 
@@ -96,7 +82,6 @@ rm -rf .next
 cd /var/www/multimodel-chat-ru
 git pull                 # Получаем обновления из репозитория
 ```
-
 2. Обновление IP адреса и перезапуск сервисов:
 ```bash
 chmod +x scripts/update-ip.sh  # Только при первом использовании
@@ -106,3 +91,4 @@ chmod +x scripts/update-ip.sh  # Только при первом использ
 Примечание: Скрипт update-ip.sh изменяет только рабочую копию конфигурации nginx в 
 /etc/nginx/sites-available/multimodel-chat-ru, не затрагивая файлы в репозитории. 
 Поэтому нет необходимости использовать git stash при обновлении.
+
