@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prismaClient from '@/lib/db';
-import { generateResponse, YandexGPTModel } from '@/lib/yandexGpt';
+import { generateResponse } from '@/lib/yandexGpt';
 import { z } from 'zod';
 
 // Схема валидации входящего запроса
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     
     // Валидация входящих данных
-    const { message, model, temperature, maxTokens, chatId } = chatRequestSchema.parse(body);
+    const { message, temperature, maxTokens, chatId } = chatRequestSchema.parse(body);
 
     // Получаем или создаем чат
     const chat = chatId 
