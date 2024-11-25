@@ -8,6 +8,52 @@
 - npm 9.x или выше
 - SQLite 3.x
 
+## Развертывание на Debian
+
+1. Скопируйте файлы на сервер:
+```bash
+scp -r ./* user@your-server:/var/www/multimodel-chat/
+```
+
+2. Подключитесь к серверу:
+```bash
+ssh user@your-server
+```
+
+3. Перейдите в директорию проекта:
+```bash
+cd /var/www/multimodel-chat
+```
+
+4. Сделайте скрипты исполняемыми:
+```bash
+chmod +x scripts/*.sh
+```
+
+5. Запустите скрипт установки:
+```bash
+sudo ./scripts/setup-debian.sh
+```
+
+6. Настройте переменные окружения:
+```bash
+sudo nano .env
+```
+
+7. Проверьте статус сервиса:
+```bash
+sudo systemctl status multimodel-chat
+```
+
+### Полезные команды
+
+- Просмотр логов: `sudo journalctl -u multimodel-chat`
+- Перезапуск приложения: `sudo systemctl restart multimodel-chat`
+- Проверка конфигурации nginx: `sudo nginx -t`
+- Перезапуск nginx: `sudo systemctl restart nginx`
+
+
+
 ## Установка и запуск
 
 1. Клонируйте репозиторий:
