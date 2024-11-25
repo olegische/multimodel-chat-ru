@@ -1,94 +1,68 @@
-# Развертывание Multimodel Chat в Debian Container
+# Multimodel Chat
 
-Инструкция по установке и настройке приложения Multimodel Chat в контейнере Debian.
+## Запуск в Docker
 
-## Подготовка системы
-
-1. Клонирование репозитория:
+1. Сборка образа:
 ```bash
-cd /var/www
-git clone https://github.com/your-username/multimodel-chat.git multimodel-chat-ru
-cd multimodel-chat-ru
+docker build -t multimodel-chat-ru .
 ```
 
-2. Установка прав на исполнение скриптов:
-```bash
-chmod +x scripts/*.sh
-```
+2. Настройка переменных окружения:
 
-3. Запуск скрипта установки:
-```bash
-./scripts/setup-debian.sh
-```
-Скрипт выполнит:
-- Обновление системы
-- Установку необходимых пакетов (curl, git, nginx, sqlite3, ufw)
-- Установку Node.js 20.x
-- Настройку рабочей директории
-- Настройку Nginx
-- Настройку systemd сервиса
-- Настройку брандмауэра (только порт 80)
-
-4. Настройка переменных окружения:
+Создайте файл .env с необходимыми переменными:
 ```bash
 cp .env.example .env
 vi .env
 ```
 
-5. Сборка и запуск приложения:
+3. Создание директории для базы данных:
 ```bash
-./scripts/build.sh  # Установка зависимостей и сборка
-./scripts/start.sh  # Запуск приложения
+mkdir -p $(pwd)/data/prisma
 ```
 
-## Полезные команды
+4. Запуск контейнера:
 
-- Просмотр логов nginx: `tail -f /var/log/nginx/error.log`
-- Проверка порта: `netstat -tulpn | grep 3000`
-
-## Устранение неполадок
-
-1. Если порт 3000 занят:
+Вариант 1 - через монтирование .env файла:
 ```bash
-lsof -i :3000
-kill -9 <PID>
+docker run -p 3000:3000 \
+  -v $(pwd)/.env:/app/.env \
+  -v $(pwd)/data/prisma:/app/prisma \
+  multimodel-chat-ru
 ```
 
-2. Если не хватает прав:
+Вариант 2 - через передачу переменных напрямую:
 ```bash
-chown -R www-data:www-data /var/www/multimodel-chat-ru
-chmod -R 755 /var/www/multimodel-chat-ru
+docker run -p 3000:3000 \
+  -e YANDEX_GPT_API_URL=your_url \
+  -e YANDEX_IAM_TOKEN=your_token \
+  -e YANDEX_FOLDER_ID=your_folder_id \
+  -e DATABASE_URL=file:/app/prisma/dev.db \
+  -v $(pwd)/data/prisma:/app/prisma \
+  multimodel-chat-ru
 ```
 
-3. Если проблемы с npm:
-```bash
-npm cache clean --force
-rm -rf node_modules
-rm -rf .next
-./scripts/build.sh
-```
+## Требования
 
-## Требования к системе
-
-- Debian 10+ или Ubuntu 20.04+
-- Минимум 1GB RAM
+- Docker
+- 1GB RAM
 - 10GB свободного места
-- Порт 80 должен быть свободен
 
-## Обновление приложения
+## Доступ к приложению
 
-1. Получение обновлений:
-```bash
-cd /var/www/multimodel-chat-ru
-git pull                 # Получаем обновления из репозитория
-```
-2. Обновление IP адреса и перезапуск сервисов:
-```bash
-chmod +x scripts/update-ip.sh  # Только при первом использовании
-./scripts/update-ip.sh
-```
+После запуска контейнера приложение будет доступно по адресу:
+http://localhost:3000
 
-Примечание: Скрипт update-ip.sh изменяет только рабочую копию конфигурации nginx в 
-/etc/nginx/sites-available/multimodel-chat-ru, не затрагивая файлы в репозитории. 
-Поэтому нет необходимости использовать git stash при обновлении.
+## База данных
+
+1. База данных SQLite хранится в директории `./data/prisma` на хост-машине
+2. Эта директория монтируется в контейнер как `/app/prisma`
+3. При первом запуске база данных будет создана автоматически
+4. Все данные сохраняются между перезапусками контейнера
+5. Для резервного копирования достаточно сохранить содержимое директории `./data/prisma`
+
+## Важные замечания
+
+1. Убедитесь, что директория `./data/prisma` имеет правильные права доступа
+2. Не изменяйте путь к базе данных в DATABASE_URL внутри контейнера
+3. При необходимости перенести данные, копируйте всю директорию `./data/prisma`
 
