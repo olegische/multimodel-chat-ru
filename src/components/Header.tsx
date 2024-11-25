@@ -2,8 +2,16 @@
 
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import ModelSelector from './ModelSelector';
+import { YandexGPTModel } from '@/lib/yandexGpt';
 
-export default function Header() {
+interface HeaderProps {
+  selectedModel: YandexGPTModel;
+  onModelChange: (model: YandexGPTModel) => void;
+  disabled?: boolean;
+}
+
+export default function Header({ selectedModel, onModelChange, disabled = false }: HeaderProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -31,12 +39,19 @@ export default function Header() {
           Multimodel Chat
         </h1>
         
-        <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
-        >
-          {theme === 'dark' ? '🌞' : '🌙'}
-        </button>
+        <div className="flex items-center gap-4">
+          <ModelSelector
+            selectedModel={selectedModel}
+            onModelChange={onModelChange}
+            disabled={disabled}
+          />
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+          >
+            {theme === 'dark' ? '🌞' : '🌙'}
+          </button>
+        </div>
       </div>
     </header>
   );

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Header from '@/components/Header';
 import ChatWindow from '@/components/ChatWindow';
 import Footer from '@/components/Footer';
+import { YandexGPTModel, YANDEX_GPT_MODELS } from '@/lib/yandexGpt';
 
 interface Message {
   id: number;
@@ -15,6 +16,7 @@ interface Message {
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<YandexGPTModel>('YandexGPT Pro RC');
 
   const handleSendMessage = async (
     message: string, 
@@ -29,6 +31,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           message,
+          model: selectedModel,
           temperature: settings.temperature,
           maxTokens: settings.maxTokens,
         }),
@@ -47,9 +50,15 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 relative">
-      <Header />
-      <main className="flex-1 overflow-hidden mt-16 max-w-5xl mx-auto w-full">
-        <ChatWindow messages={messages} loading={loading} />
+      <Header 
+        selectedModel={selectedModel}
+        onModelChange={setSelectedModel}
+        disabled={loading}
+      />
+      <main className="flex-1 overflow-hidden mt-16 mb-24 max-w-5xl mx-auto w-full">
+        <div className="h-full overflow-y-auto">
+          <ChatWindow messages={messages} loading={loading} />
+        </div>
       </main>
       <Footer onSendMessage={handleSendMessage} disabled={loading} />
     </div>
