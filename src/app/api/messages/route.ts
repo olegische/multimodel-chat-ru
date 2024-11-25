@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import prismaClient from '@/lib/db';
 import { headers } from 'next/headers';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const headersList = headers();
     const chatId = headersList.get('x-chat-id');
