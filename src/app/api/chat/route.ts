@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prismaClient from '@/lib/db';
-import { generateResponse } from '@/lib/yandexGpt';
+import { generateResponse, YandexGPTModel } from '@/lib/yandexGpt';
 import { z } from 'zod';
 
 // Схема валидации входящего запроса
@@ -9,7 +9,7 @@ const chatRequestSchema = z.object({
   model: z.string(),
   temperature: z.number().min(0).max(1).default(0.7),
   maxTokens: z.number().min(1).max(2000).default(1000),
-  chatId: z.string().optional() // Опциональный параметр для продолжения существующего чата
+  chatId: z.string().optional()
 });
 
 export async function POST(request: Request) {
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     
     // Валидация входящих данных
-    const { message, temperature, maxTokens, chatId } = chatRequestSchema.parse(body);
+    const { message, model, temperature, maxTokens, chatId } = chatRequestSchema.parse(body);
 
     // Получаем или создаем чат
     const chat = chatId 
@@ -35,15 +35,16 @@ export async function POST(request: Request) {
     const previousMessages = await prismaClient.message.findMany({
       where: { chatId: chat.id },
       orderBy: { timestamp: 'asc' },
-      take: 10 // Ограничиваем контекст последними 10 сообщениями
+      take: 10
     });
 
     // Получаем ответ от GPT с учетом контекста
     const gptResponse = await generateResponse(
       message,
-      previousMessages,
+      model as YandexGPTModel,
       temperature,
-      maxTokens
+      maxTokens,
+      previousMessages
     );
 
     // Сохраняем сообщение в БД
