@@ -15,15 +15,6 @@ check_directory() {
     return 1
 }
 
-# Функция проверки существования файла
-check_file() {
-    if [ -f "$1" ]; then
-        echo "Файл $1 уже существует"
-        return 0
-    fi
-    return 1
-}
-
 # Обновление системы
 echo "Проверка обновлений системы..."
 apt-get update
@@ -60,16 +51,10 @@ if ! check_directory "/var/www/multimodel-chat-ru"; then
 fi
 
 # Настройка Nginx
-if ! check_file "/etc/nginx/sites-available/multimodel-chat-ru"; then
-    echo "Настройка Nginx..."
-    cp scripts/nginx.conf /etc/nginx/sites-available/multimodel-chat-ru
-    if ! check_file "/etc/nginx/sites-enabled/multimodel-chat-ru"; then
-        ln -s /etc/nginx/sites-available/multimodel-chat-ru /etc/nginx/sites-enabled/
-    fi
-    nginx -t && nginx -s reload
-else
-    echo "Конфигурация Nginx уже существует"
-fi
+echo "Настройка Nginx..."
+cp scripts/nginx.conf /etc/nginx/sites-available/multimodel-chat-ru
+ln -sf /etc/nginx/sites-available/multimodel-chat-ru /etc/nginx/sites-enabled/
+nginx -t && nginx -s reload
 
 echo "Установка завершена!"
 echo "Проверьте работу приложения по адресу http://localhost" 
