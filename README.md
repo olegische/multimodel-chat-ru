@@ -1,51 +1,61 @@
 # Multimodel Chat
 
-Веб-приложение для общения с Yandex GPT с поддержкой контекста беседы.
+Веб-приложение для общения с различными языковыми моделями.
 
-## Технологии
+## Требования
 
-- Next.js
-- TypeScript
-- Tailwind CSS
-- Prisma
-- SQLite
+- Node.js 18.x или выше
+- npm 9.x или выше
+- SQLite 3.x
 
-## Начало работы
+## Установка и запуск
 
-1. Установите зависимости:
+1. Клонируйте репозиторий:
 ```bash
-npm install
+git clone https://github.com/your-username/multimodel-chat.git
+cd multimodel-chat
 ```
 
-2. Создайте файл .env и настройте переменные окружения:
+2. Сделайте скрипты исполняемыми:
+```bash
+chmod +x scripts/build.sh scripts/start.sh
+```
+
+3. Запустите скрипт сборки:
+```bash
+./scripts/build.sh
+```
+
+4. Настройте переменные окружения:
 ```bash
 cp .env.example .env
+# Отредактируйте .env файл, добавив необходимые ключи API
 ```
 
-3. Запустите приложение в режиме разработки:
+5. Запустите приложение:
+```bash
+./scripts/start.sh
+```
+
+Приложение будет доступно по адресу http://localhost:3000
+
+## Переменные окружения
+
+- `DATABASE_URL` - URL для подключения к SQLite базе данных
+- `YANDEX_GPT_API_URL` - URL API Yandex GPT
+- `YANDEX_IAM_TOKEN` - IAM токен для доступа к API
+- `YANDEX_FOLDER_ID` - Идентификатор каталога в Yandex Cloud
+
+## Разработка
+
+Для запуска в режиме разработки:
 ```bash
 npm run dev
 ```
 
-## Структура проекта
+## Тестирование
 
+Запуск тестов:
+```bash
+npm test
 ```
-multimodel-chat/
-├── src/
-│   ├── components/    # React компоненты
-│   ├── lib/          # Библиотеки и утилиты
-│   ├── styles/       # CSS стили
-│   ├── types/        # TypeScript типы
-│   └── utils/        # Вспомогательные функции
-├── prisma/           # Схемы и миграции базы данных
-├── public/           # Статические файлы
-└── docs/            # Документация
-```
-
-## Скрипты
-
-- `npm run dev` - Запуск в режиме разработки
-- `npm run build` - Сборка проекта
-- `npm run start` - Запуск production версии
-- `npm run lint` - Проверка кода линтером
-- `npm run format` - Форматирование кода
