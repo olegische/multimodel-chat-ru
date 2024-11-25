@@ -104,12 +104,13 @@ const convertToGPTMessages = (dbMessages: DBMessage[]): GPTMessage[] => {
 
 export async function generateResponse(
   message: string,
-  previousMessages: DBMessage[],
+  model: YandexGPTModel,
   temperature?: number,
-  maxTokens?: number
+  maxTokens?: number,
+  previousMessages: DBMessage[] = []
 ): Promise<string> {
   const config = getConfig();
-  const model = YANDEX_GPT_MODELS[DEFAULT_CONFIG.defaultModel];
+  const modelConfig = YANDEX_GPT_MODELS[model];
 
   try {
     const response = await fetch(config.apiUrl, {
@@ -120,7 +121,7 @@ export async function generateResponse(
         'x-folder-id': config.folderId
       },
       body: JSON.stringify({
-        modelUri: `gpt://${config.folderId}/${model.uri}`,
+        modelUri: `gpt://${config.folderId}/${modelConfig.uri}`,
         completionOptions: {
           stream: false,
           temperature: `${temperature || DEFAULT_CONFIG.temperature}`,
