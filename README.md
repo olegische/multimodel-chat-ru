@@ -1,107 +1,90 @@
-# Multimodel Chat
+# Развертывание Multimodel Chat в Debian Container
 
-Веб-приложение для общения с различными языковыми моделями.
+Инструкция по установке и настройке приложения Multimodel Chat в контейнере Debian.
 
-## Требования
+## Подготовка системы
 
-- Node.js 18.x или выше
-- npm 9.x или выше
-- SQLite 3.x
-
-## Развертывание на Debian
-
-1. Скопируйте файлы на сервер:
+1. Клонирование репозитория:
 ```bash
-scp -r ./* user@your-server:/var/www/multimodel-chat/
+cd /var/www
+git clone https://github.com/your-username/multimodel-chat.git multimodel-chat-ru
+cd multimodel-chat-ru
 ```
 
-2. Подключитесь к серверу:
-```bash
-ssh user@your-server
-```
-
-3. Перейдите в директорию проекта:
-```bash
-cd /var/www/multimodel-chat
-```
-
-4. Сделайте скрипты исполняемыми:
+2. Установка прав на исполнение скриптов:
 ```bash
 chmod +x scripts/*.sh
 ```
 
-5. Запустите скрипт установки:
+3. Запуск скрипта установки:
 ```bash
-sudo ./scripts/setup-debian.sh
+./scripts/setup-debian.sh
+```
+Скрипт выполнит:
+- Обновление системы
+- Установку необходимых пакетов (curl, git, nginx, sqlite3, ufw)
+- Установку Node.js 20.x
+- Настройку рабочей директории
+- Настройку Nginx
+- Настройку systemd сервиса
+- Настройку брандмауэра (только порт 80)
+
+4. Настройка переменных окружения:
+```bash
+cp .env.example .env
+vi .env
 ```
 
-6. Настройте переменные окружения:
+5. Сборка и запуск приложения:
 ```bash
-sudo nano .env
+./scripts/build.sh  # Установка зависимостей и сборка
+./scripts/start.sh  # Запуск приложения
 ```
 
-7. Проверьте статус сервиса:
+## Проверка работоспособности
+
+1. Проверка статуса службы:
 ```bash
-sudo systemctl status multimodel-chat
+systemctl status multimodel-chat
 ```
 
-### Полезные команды
-
-- Просмотр логов: `sudo journalctl -u multimodel-chat`
-- Перезапуск приложения: `sudo systemctl restart multimodel-chat`
-- Проверка конфигурации nginx: `sudo nginx -t`
-- Перезапуск nginx: `sudo systemctl restart nginx`
-
-
-
-## Установка и запуск
-
-1. Клонируйте репозиторий:
+2. Просмотр логов:
 ```bash
-git clone https://github.com/your-username/multimodel-chat.git
-cd multimodel-chat
+journalctl -u multimodel-chat -f
 ```
 
-2. Сделайте скрипты исполняемыми:
+## Полезные команды
+
+- Перезапуск приложения: `systemctl restart multimodel-chat`
+- Остановка приложения: `systemctl stop multimodel-chat`
+- Просмотр логов nginx: `tail -f /var/log/nginx/error.log`
+- Проверка порта: `netstat -tulpn | grep 3000`
+
+## Устранение неполадок
+
+1. Если порт 3000 занят:
 ```bash
-chmod +x scripts/build.sh scripts/start.sh
+lsof -i :3000
+kill -9 <PID>
 ```
 
-3. Запустите скрипт сборки:
+2. Если не хватает прав:
 ```bash
+chown -R www-data:www-data /var/www/multimodel-chat-ru
+chmod -R 755 /var/www/multimodel-chat-ru
+```
+
+3. Если проблемы с npm:
+```bash
+npm cache clean --force
+rm -rf node_modules
+rm -rf .next
 ./scripts/build.sh
 ```
 
-4. Настройте переменные окружения:
-```bash
-cp .env.example .env
-# Отредактируйте .env файл, добавив необходимые ключи API
-```
+## Требования к системе
 
-5. Запустите приложение:
-```bash
-./scripts/start.sh
-```
-
-Приложение будет доступно по адресу http://localhost:3000
-
-## Переменные окружения
-
-- `DATABASE_URL` - URL для подключения к SQLite базе данных
-- `YANDEX_GPT_API_URL` - URL API Yandex GPT
-- `YANDEX_IAM_TOKEN` - IAM токен для доступа к API
-- `YANDEX_FOLDER_ID` - Идентификатор каталога в Yandex Cloud
-
-## Разработка
-
-Для запуска в режиме разработки:
-```bash
-npm run dev
-```
-
-## Тестирование
-
-Запуск тестов:
-```bash
-npm test
-```
+- Debian 10+ или Ubuntu 20.04+
+- Минимум 1GB RAM
+- 10GB свободного места
+- Порт 80 должен быть свободен
