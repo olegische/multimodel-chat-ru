@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import prismaClient from '@/lib/db';
+import { headers } from 'next/headers';
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const chatId = searchParams.get('chatId');
+    const headersList = headers();
+    const chatId = headersList.get('x-chat-id');
 
     if (!chatId) {
       return NextResponse.json(
@@ -34,4 +35,6 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-} 
+}
+
+export const dynamic = 'force-dynamic'; 
