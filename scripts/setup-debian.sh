@@ -31,7 +31,7 @@ apt-get upgrade -y
 
 # Установка необходимых пакетов
 echo "Проверка необходимых пакетов..."
-PACKAGES="curl git nginx sqlite3 ufw vim"
+PACKAGES="curl git nginx sqlite3 vim"
 for pkg in $PACKAGES; do
     if ! is_installed "$pkg"; then
         echo "Установка $pkg..."
@@ -80,19 +80,6 @@ if ! check_file "/etc/systemd/system/multimodel-chat.service"; then
     systemctl start multimodel-chat
 else
     echo "Служба multimodel-chat уже настроена"
-fi
-
-# Настройка брандмауэра
-if ! ufw status | grep -q "Status: active"; then
-    echo "Настройка брандмауэра..."
-    ufw default deny incoming
-    ufw default allow outgoing
-    ufw allow 80/tcp
-    ufw --force enable
-else
-    echo "Брандмауэр уже настроен"
-    echo "Текущие правила:"
-    ufw status
 fi
 
 echo "Установка завершена!"
