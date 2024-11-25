@@ -89,15 +89,22 @@ const formatMessages = (message: string, context: GPTMessage[]): GPTMessage[] =>
   ];
 };
 
+// Добавим функцию преобразования сообщений из БД в формат GPTMessage
+const convertToGPTMessages = (dbMessages: any[]): GPTMessage[] => {
+  return dbMessages.map(msg => ({
+    role: msg.response ? 'assistant' : 'user',
+    text: msg.response || msg.message
+  }));
+};
+
 export async function generateResponse(
   message: string,
-  modelName: YandexGPTModel = DEFAULT_CONFIG.defaultModel,
-  temperature: number = DEFAULT_CONFIG.temperature,
-  maxTokens: number = DEFAULT_CONFIG.maxTokens,
-  previousMessages: Message[] = []
-) {
+  previousMessages: any[],
+  temperature?: number,
+  maxTokens?: number
+): Promise<string> {
   const config = getConfig();
-  const model = YANDEX_GPT_MODELS[modelName];
+  const model = YANDEX_GPT_MODELS[DEFAULT_CONFIG.defaultModel];
 
   try {
     const response = await fetch(config.apiUrl, {
@@ -111,10 +118,10 @@ export async function generateResponse(
         modelUri: `gpt://${config.folderId}/${model.uri}`,
         completionOptions: {
           stream: false,
-          temperature,
+          temperature: `${temperature || DEFAULT_CONFIG.temperature}`,
           maxTokens: `${maxTokens}`
         },
-        messages: formatMessages(message, previousMessages)
+        messages: formatMessages(message, convertToGPTMessages(previousMessages))
       })
     });
 
