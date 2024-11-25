@@ -13,11 +13,38 @@ interface GPTMessage {
   text: string;
 }
 
+// Available models configuration
+export const YANDEX_GPT_MODELS = {
+  'YandexGPT Lite Latest': {
+    uri: 'yandexgpt-lite/latest',
+    generation: 3
+  },
+  'YandexGPT Lite RC': {
+    uri: 'yandexgpt-lite/rc',
+    generation: 4
+  },
+  'YandexGPT Pro Latest': {
+    uri: 'yandexgpt/latest',
+    generation: 3
+  },
+  'YandexGPT Pro RC': {
+    uri: 'yandexgpt/rc',
+    generation: 4
+  },
+  'YandexGPT Pro 32k RC': {
+    uri: 'yandexgpt-32k/rc',
+    generation: 4
+  }
+} as const;
+
+export type YandexGPTModel = keyof typeof YANDEX_GPT_MODELS;
+
 // Constants
 const DEFAULT_CONFIG = {
   temperature: 0.7,
   maxTokens: 1000,
-  systemPrompt: 'Ты — умный ассистент, который помогает пользователям.'
+  systemPrompt: 'Ты — умный ассистент, который помогает пользователям.',
+  defaultModel: 'YandexGPT Pro RC' as YandexGPTModel
 } as const;
 
 // Validation schemas
@@ -54,8 +81,8 @@ const formatMessages = (
   previousMessages: Message[],
 ): GPTMessage[] => {
   const context = previousMessages.map(msg => [
-    { role: 'user', text: msg.content },
-    { role: 'assistant', text: msg.content } // Предполагаем, что ответ тоже находится в content
+    { role: 'user', text: msg.message },
+    { role: 'assistant', text: msg.response }
   ]).flat();
 
   return [
@@ -67,11 +94,13 @@ const formatMessages = (
 
 export async function generateResponse(
   message: string,
+  modelName: YandexGPTModel = DEFAULT_CONFIG.defaultModel,
   temperature: number = DEFAULT_CONFIG.temperature,
   maxTokens: number = DEFAULT_CONFIG.maxTokens,
   previousMessages: Message[] = []
 ) {
   const config = getConfig();
+  const model = YANDEX_GPT_MODELS[modelName];
 
   try {
     const response = await fetch(config.apiUrl, {
@@ -82,7 +111,7 @@ export async function generateResponse(
         'x-folder-id': config.folderId
       },
       body: JSON.stringify({
-        modelUri: `gpt://${config.folderId}/yandexgpt/rc`,
+        modelUri: `gpt://${config.folderId}/${model.uri}`,
         completionOptions: {
           stream: false,
           temperature,
