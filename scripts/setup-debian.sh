@@ -16,13 +16,13 @@ sudo apt-get install -y nodejs
 
 # Создание рабочей директории
 echo "Создание рабочей директории..."
-sudo mkdir -p /var/www/multimodel-chat
-sudo chown www-data:www-data /var/www/multimodel-chat
+sudo mkdir -p /var/www/multimodel-chat-ru
+sudo chown www-data:www-data /var/www/multimodel-chat-ru
 
 # Настройка Nginx
 echo "Настройка Nginx..."
-sudo cp scripts/nginx.conf /etc/nginx/sites-available/multimodel-chat
-sudo ln -s /etc/nginx/sites-available/multimodel-chat /etc/nginx/sites-enabled/
+sudo cp scripts/nginx.conf /etc/nginx/sites-available/multimodel-chat-ru
+sudo ln -s /etc/nginx/sites-available/multimodel-chat-ru /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl restart nginx
 
 # Настройка systemd сервиса

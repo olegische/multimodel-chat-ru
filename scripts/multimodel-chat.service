@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 User=www-data
-WorkingDirectory=/var/www/multimodel-chat
+WorkingDirectory=/var/www/multimodel-chat-ru
 Environment=NODE_ENV=production
 Environment=PORT=3000
 ExecStart=/usr/bin/npm start
