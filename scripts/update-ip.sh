@@ -20,8 +20,12 @@ nginx -t
 
 if [ $? -eq 0 ]; then
     echo "Перезапуск сервисов..."
-    systemctl restart nginx
-    systemctl restart multimodel-chat
+    nginx -s reload
+    # Перезапускаем приложение через kill и npm start
+    if [ -f /var/www/multimodel-chat-ru/tmp/app.pid ]; then
+        kill $(cat /var/www/multimodel-chat-ru/tmp/app.pid)
+    fi
+    cd /var/www/multimodel-chat-ru && npm start &
     echo "Готово! Приложение доступно по адресу: http://$SERVER_IP"
 else
     echo "Ошибка в конфигурации nginx"
