@@ -6,10 +6,35 @@
 
 1. Установка необходимых пакетов:
 ```bash
-sudo apt-get update && sudo apt-get install -y docker.io nginx git
+sudo apt-get update && sudo apt-get install -y docker.io nginx git fail2ban vim
 ```
 
-2. Клонирование репозитория:
+2. Настройка fail2ban для защиты от сканирования уязвимостей:
+```bash
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+sudo vim /etc/fail2ban/jail.local
+```
+
+   В открывшемся файле найдите и раскомментируйте (если закомментировано) следующие строки:
+   ```
+   [sshd]
+   enabled = true
+
+   [nginx-http-auth]
+   enabled = true
+
+   [nginx-botsearch]
+   enabled = true
+   ```
+
+   Сохраните изменения и закройте редактор (в vim: нажмите Esc, затем введите :wq и нажмите Enter).
+
+3. Перезапустите fail2ban:
+```bash
+sudo systemctl restart fail2ban
+```
+
+4. Клонирование репозитория:
 ```bash
 sudo git clone https://github.com/your-username/multimodel-chat.git /opt/multimodel-chat-ru
 cd /opt/multimodel-chat-ru
