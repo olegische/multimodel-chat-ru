@@ -15,13 +15,19 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # Создание рабочей директории
 WORKDIR /app
 
-# Копирование файлов приложения
-COPY . .
+# Копирование package.json и package-lock.json
+COPY package*.json ./
 
-# Установка зависимостей и настройка базы данных
-RUN npm install && \
-    npx prisma generate && \
+# Установка зависимостей
+RUN npm install
+
+# Копирование Prisma схемы и настройка базы данных
+COPY prisma ./prisma/
+RUN npx prisma generate && \
     npx prisma migrate deploy
+
+# Копирование остальных файлов приложения
+COPY . .
 
 # Сборка приложения
 RUN npm run build
@@ -29,5 +35,5 @@ RUN npm run build
 # Открываем порт для Next.js
 EXPOSE 3000
 
-# Запуск приложения
-CMD ["npm", "start"] 
+# Запуск приложения с предварительной миграцией базы данных
+CMD npx prisma migrate deploy && npm start 
