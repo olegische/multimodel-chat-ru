@@ -19,8 +19,9 @@ WORKDIR /app
 COPY . .
 
 # Установка зависимостей и сборка приложения
-RUN npm install \
-    && npm run build
+RUN npm install && \
+    npx prisma generate && \
+    npm run build
 
 # Открываем порт для Next.js
 EXPOSE 3000
