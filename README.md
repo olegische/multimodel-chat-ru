@@ -113,7 +113,7 @@ sudo docker build -t multimodel-chat-ru .
 sudo docker stop multimodel-chat
 sudo docker rm multimodel-chat
 sudo docker run -d \
-  --name multimodel-chat \
+  --name multimodel-chat-ru \
   --restart unless-stopped \
   -p 127.0.0.1:3000:3000 \
   -v /opt/multimodel-chat-ru/.env:/app/.env \
