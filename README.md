@@ -25,7 +25,7 @@ sudo nginx -t && sudo nginx -s reload
 
 4. Настройка IP адреса:
 ```bash
-chmod +x scripts/update-ip.sh
+sudo chmod +x scripts/update-ip.sh
 sudo ./scripts/update-ip.sh
 ```
 
@@ -39,8 +39,8 @@ sudo chown -R $USER:$USER /opt/multimodel-chat-ru/data
 
 2. Настройка переменных окружения:
 ```bash
-cp .env.example .env
-vi .env
+sudo cp .env.example .env
+sudo vi .env
 ```
 
 ### Запуск контейнера
