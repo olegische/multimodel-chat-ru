@@ -26,8 +26,7 @@ COPY prisma ./prisma/
 
 # Генерация Prisma Client с временным URL базы данных
 ENV DATABASE_URL="file:/app/prisma/dev.db"
-RUN npx prisma generate && \
-    npx prisma migrate deploy
+RUN npx prisma generate
 
 # Копирование остальных файлов приложения
 COPY . .
@@ -38,5 +37,5 @@ RUN npm run build
 # Открываем порт для Next.js
 EXPOSE 3000
 
-# Запуск приложения с предварительной миграцией базы данных
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+# Создаем директорию для базы данных и применяем миграции при запуске
+CMD ["sh", "-c", "mkdir -p /app/prisma && npx prisma migrate deploy && npx prisma db push --accept-data-loss && npm start"]
