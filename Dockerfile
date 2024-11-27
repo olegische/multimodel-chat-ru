@@ -23,6 +23,9 @@ RUN npm install
 
 # Копирование Prisma схемы и настройка базы данных
 COPY prisma ./prisma/
+
+# Генерация Prisma Client с временным URL базы данных
+ENV DATABASE_URL="file:/app/prisma/dev.db"
 RUN npx prisma generate && \
     npx prisma migrate deploy
 
