@@ -17,6 +17,16 @@ sudo vim /etc/fail2ban/jail.local
 
    В открывшемся файле найдите и раскомментируйте (если закомментировано) следующие строки:
    ```
+   [nginx-forbidden]
+   enabled = true
+   port = http,https
+   filter = nginx-forbidden
+   logpath = /var/log/nginx/error.log
+   maxretry = 3
+   bantime = 3600
+   findtime = 600
+
+
    [sshd]
    enabled = true
 
