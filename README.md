@@ -78,7 +78,7 @@ sudo docker build -t multimodel-chat-ru .
 2. Запуск контейнера:
 ```bash
 sudo docker run -d \
-  --name multimodel-chat \
+  --name multimodel-chat-ru \
   --restart unless-stopped \
   -p 127.0.0.1:3000:3000 \
   -v /opt/multimodel-chat-ru/.env:/app/.env \
@@ -110,8 +110,8 @@ sudo git pull
 2. Пересборка и перезапуск контейнера:
 ```bash
 sudo docker build -t multimodel-chat-ru .
-sudo docker stop multimodel-chat
-sudo docker rm multimodel-chat
+sudo docker stop multimodel-chat-ru
+sudo docker rm multimodel-chat-ru
 sudo docker run -d \
   --name multimodel-chat-ru \
   --restart unless-stopped \
