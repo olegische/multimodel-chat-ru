@@ -91,7 +91,7 @@ sudo docker run -d \
 1. Проверка статуса контейнера:
 ```bash
 sudo docker ps
-sudo docker logs multimodel-chat
+sudo docker logs multimodel-chat-ru
 ```
 
 2. Проверка доступности приложения:
