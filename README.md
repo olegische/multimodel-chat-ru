@@ -26,7 +26,6 @@ sudo vim /etc/fail2ban/jail.local
    bantime = 3600
    findtime = 600
 
-
    [sshd]
    enabled = true
 
