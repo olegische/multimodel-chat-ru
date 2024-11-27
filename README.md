@@ -80,9 +80,9 @@ sudo docker build -t multimodel-chat-ru .
 sudo docker run -d \
   --name multimodel-chat-ru \
   --restart unless-stopped \
-  -p 127.0.0.1:3000:3000 \
+  -p 3000:3000 \
   -v /opt/multimodel-chat-ru/.env:/app/.env \
-  -v /opt/multimodel-chat-ru/data/prisma:/app/prisma \
+  -v /opt/multimodel-chat-ru/prisma:/app/prisma \
   multimodel-chat-ru
 ```
 
@@ -115,9 +115,9 @@ sudo docker rm multimodel-chat-ru
 sudo docker run -d \
   --name multimodel-chat-ru \
   --restart unless-stopped \
-  -p 127.0.0.1:3000:3000 \
+  -p 3000:3000 \
   -v /opt/multimodel-chat-ru/.env:/app/.env \
-  -v /opt/multimodel-chat-ru/data/prisma:/app/prisma \
+  -v /opt/multimodel-chat-ru/prisma:/app/prisma \
   multimodel-chat-ru
 ```
 
