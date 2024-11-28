@@ -1,5 +1,5 @@
-# Базовый образ
-FROM debian:11
+# Явно указываем платформу
+FROM --platform=linux/amd64 debian:11
 
 # Установка необходимых пакетов
 RUN apt-get update && apt-get install -y \
