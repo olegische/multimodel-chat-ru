@@ -6,10 +6,55 @@ Multimodel Chat - это веб-приложение для взаимодейс
 ## 2. Компоненты системы
 
 ### 2.1. Frontend
-- **Framework**: Next.js 14.x
-- **UI компоненты**: React 18.x
-- **Стилизация**: Tailwind CSS
-- **Темизация**: next-themes для поддержки светлой/тёмной темы
+
+#### 2.1.1. Структура приложения
+```
+src/app/
+├── api/                    # API Routes
+│   ├── chat/              
+│   │   └── route.ts       # Обработчик сообщений чата
+│   └── messages/          
+│       └── route.ts       # Получение истории сообщений
+├── fonts/                 
+│   ├── GeistMonoVF.woff   # Моноширинный шрифт для кода
+│   └── GeistVF.woff       # Основной шрифт интерфейса
+├── favicon.ico            # Иконка сайта
+├── globals.css           # Глобальные стили и Tailwind
+├── layout.tsx            # Корневой layout приложения
+└── page.tsx             # Главная страница с чатом
+```
+
+#### 2.1.2. Компоненты
+```
+src/components/
+├── ChatWindow.tsx          # Основное окно чата
+├── GenerationSettings.tsx  # Настройки генерации текста
+├── ModelSelector.tsx       # Выбор LLM модели
+├── Footer.tsx             # Подвал сайта
+├── Header.tsx             # Шапка сайта
+└── ThemeProvider.tsx      # Провайдер темы оформления
+```
+
+#### 2.1.3. Основные компоненты
+- **Интерфейс чата**:
+  - `ChatWindow`: Основной компонент для взаимодействия с LLM
+  - `ModelSelector`: Выбор модели (YandexGPT/GigaChat)
+  - `GenerationSettings`: Настройки параметров генерации
+
+- **Навигация и UI**:
+  - `Header`: Навигация и основные элементы управления
+  - `Footer`: Информация и дополнительные ссылки
+  - `ThemeProvider`: Управление темной/светлой темой
+
+#### 2.1.4. Технический стек
+- **Framework**: Next.js 14 с серверными компонентами
+- **Стилизация**: Tailwind CSS + глобальные стили
+- **Типографика**: Geist Variable fonts (Regular + Mono)
+- **API интеграция**: Server Actions и API Routes
+
+#### 2.1.5. API Endpoints
+- **POST /api/chat**: Отправка сообщений и получение ответов от LLM
+- **GET /api/messages**: Получение истории сообщений чата
 
 ### 2.2. Backend
 - **API Routes**: Next.js API маршруты
