@@ -27,30 +27,35 @@ src/app/
 #### 2.1.2. Компоненты
 ```
 src/components/
-├── ChatWindow.tsx          # Основное окно чата
-├── GenerationSettings.tsx  # Настройки генерации текста
-├── ModelSelector.tsx       # Выбор LLM модели
-├── Footer.tsx             # Подвал сайта
-├── Header.tsx             # Шапка сайта
-└── ThemeProvider.tsx      # Провайдер темы оформления
+├── ChatWindow.tsx          # Основное окно чата с сообщениями
+├── GenerationSettings.tsx  # Настройки температуры и токенов
+├── ModelSelector.tsx       # Выбор модели YandexGPT
+├── Footer.tsx             # Ввод сообщений и настройки
+├── Header.tsx             # Навигация и переключение темы
+└── ThemeProvider.tsx      # Провайдер next-themes
 ```
 
 #### 2.1.3. Основные компоненты
 - **Интерфейс чата**:
-  - `ChatWindow`: Основной компонент для взаимодействия с LLM
-  - `ModelSelector`: Выбор модели (YandexGPT/GigaChat)
-  - `GenerationSettings`: Настройки параметров генерации
+  - `ChatWindow`: Отображение истории сообщений с автопрокруткой
+  - `Footer`: Форма ввода сообщений и управление настройками генерации
+  - `GenerationSettings`: Настройка temperature и maxTokens
 
-- **Навигация и UI**:
-  - `Header`: Навигация и основные элементы управления
-  - `Footer`: Информация и дополнительные ссылки
-  - `ThemeProvider`: Управление темной/светлой темой
+- **Навигация и настройки**:
+  - `Header`: Заголовок, выбор модели и переключатель темы
+  - `ModelSelector`: Выбор модели из доступных YandexGPT моделей
+  - `ThemeProvider`: Интеграция с next-themes для темной/светлой темы
 
-#### 2.1.4. Технический стек
-- **Framework**: Next.js 14 с серверными компонентами
-- **Стилизация**: Tailwind CSS + глобальные стили
-- **Типографика**: Geist Variable fonts (Regular + Mono)
-- **API интеграция**: Server Actions и API Routes
+#### 2.1.4. Особенности реализации
+- **Client Components**: Все компоненты используют 'use client' директиву
+- **Типизация**: TypeScript для props и интерфейсов
+- **Состояние**: 
+  - React useState для локального состояния
+  - next-themes для глобальной темы
+- **Стилизация**: 
+  - Tailwind CSS для адаптивного дизайна
+  - Поддержка темной/светлой темы
+  - Responsive дизайн
 
 #### 2.1.5. API Endpoints
 - **POST /api/chat**: Отправка сообщений и получение ответов от LLM
@@ -59,8 +64,18 @@ src/components/
 ### 2.2. Backend
 
 #### 2.2.1. API Routes
-- **Chat API** (`api/chat/route.ts`): Обработка сообщений и взаимодействие с LLM
-- **Messages API** (`api/messages/route.ts`): Получение истории сообщений
+- **Chat API** (`api/chat/route.ts`):
+  - POST-обработчик сообщений чата
+  - Валидация входящих данных через Zod
+  - Управление контекстом беседы
+  - Интеграция с YandexGPT
+  - Сохранение сообщений в БД
+
+- **Messages API** (`api/messages/route.ts`):
+  - GET-обработчик истории сообщений
+  - Фильтрация по chatId
+  - Сортировка по timestamp
+  - Force-dynamic режим для актуальных данных
 
 #### 2.2.2. Библиотечные модули
 ```
@@ -70,13 +85,45 @@ src/lib/
 ```
 
 - **db.ts**: 
-  - Настройка и инициализация Prisma Client
-  - Управление подключением к базе данных SQLite
+  - Singleton паттерн для Prisma Client
+  - Глобальный кэш для режима разработки
+  - Типизация через PrismaClient
 
 - **yandexGpt.ts**:
-  - Обработка запросов к Yandex GPT API
-  - Формирование и отправка запросов
-  - Обработка ответов и ошибок
+  - Конфигурация доступных моделей YandexGPT
+  - Типизация запросов и ответов
+  - Валидация через Zod
+  - Управление контекстом сообщений
+  - Обработка ошибок API
+
+#### 2.2.3. Модели YandexGPT
+```typescript
+const YANDEX_GPT_MODELS = {
+  'YandexGPT Lite Latest': { generation: 3 },
+  'YandexGPT Lite RC': { generation: 4 },
+  'YandexGPT Pro Latest': { generation: 3 },
+  'YandexGPT Pro RC': { generation: 4 },
+  'YandexGPT Pro 32k RC': { generation: 4 }
+}
+```
+
+#### 2.2.4. Валидация данных
+- **Входящие запросы**:
+  ```typescript
+  const chatRequestSchema = z.object({
+    message: z.string().min(1),
+    model: z.string(),
+    temperature: z.number().min(0).max(1),
+    maxTokens: z.number().min(1).max(2000),
+    chatId: z.string().optional()
+  });
+  ```
+
+#### 2.2.5. Обработка ошибок
+- Валидация входящих данных
+- Обработка ошибок API
+- Логирование ошибок
+- Типизированные ответы
 
 #### 2.2.3. База данных
 - **ORM**: Prisma
@@ -85,9 +132,6 @@ src/lib/
   ```
   Chat (1) --- (n) Message
   ```
-
-#### 2.2.4. Валидация
-- **Zod**: Используется для проверки входящих данных в API
 
 ## 3. Основные модули
 
