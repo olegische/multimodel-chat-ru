@@ -174,3 +174,20 @@ source ~/.profile
    - Нажмите "Создать новый ключ" -> "Создать API-ключ"
    - Сохраните полученный ключ в переменную окружения `YANDEX_API_KEY`
 3. Сохранить ID каталога в переменную `YANDEX_FOLDER_ID` 
+
+### GigaChat API
+
+Для работы с GigaChat API необходимо:
+
+1. Получить ключ авторизации (Authorization Key):
+   - Откройте проект GigaChat API в личном кабинете Studio
+   - Выберите раздел "Настройки API"
+   - Нажмите "Получить ключ"
+   - Сохраните ключ в переменную окружения `GIGACHAT_CREDENTIALS`
+
+2. Настройте остальные переменные окружения:
+   - `GIGACHAT_API_URL` - URL API (по умолчанию "https://gigachat.devices.sberbank.ru/api/v1")
+   - `GIGACHAT_SCOPE` - область доступа (по умолчанию "GIGACHAT_API_PERS")
+   - `GIGACHAT_VERIFY_SSL_CERTS` - проверка SSL сертификатов (по умолчанию "false")
+
+> Подробная инструкция в файле docs/gigachat-setup.md
