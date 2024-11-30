@@ -1,57 +1,26 @@
 'use client';
 
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
-import ModelSelector from './ModelSelector';
-import { YandexGPTModel } from '@/lib/yandexGpt';
+import { ProviderType } from '@/providers/factory';
+import ProviderSelector from './ProviderSelector';
+import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
-  selectedModel: YandexGPTModel;
-  onModelChange: (model: YandexGPTModel) => void;
+  provider: ProviderType;
+  onProviderChange: (provider: ProviderType) => void;
   disabled?: boolean;
 }
 
-export default function Header({ selectedModel, onModelChange, disabled = false }: HeaderProps) {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <header className="fixed top-0 left-0 right-0 h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-        <div className="max-w-5xl mx-auto px-4 h-full flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-            Multimodel Chat
-          </h1>
-          <div className="w-10 h-10" /> {/* Placeholder for button */}
-        </div>
-      </header>
-    );
-  }
-
+export default function Header({ provider, onProviderChange, disabled }: HeaderProps) {
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-      <div className="max-w-5xl mx-auto px-4 h-full flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          Multimodel Chat
-        </h1>
-        
-        <div className="flex items-center gap-4">
-          <ModelSelector
-            selectedModel={selectedModel}
-            onModelChange={onModelChange}
-            disabled={disabled}
-          />
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
-          >
-            {theme === 'dark' ? '🌞' : '🌙'}
-          </button>
-        </div>
+    <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-2 bg-white border-b dark:bg-gray-900 dark:border-gray-800">
+      <h1 className="text-xl font-semibold">Multi-Model Chat</h1>
+      <div className="flex items-center gap-4">
+        <ProviderSelector
+          selectedProvider={provider}
+          onProviderChange={onProviderChange}
+          disabled={disabled}
+        />
+        <ThemeToggle />
       </div>
     </header>
   );
