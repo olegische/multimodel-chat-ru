@@ -54,7 +54,8 @@ describe('Database Schema', () => {
       model: 'test-model',
       timestamp: new Date(),
       temperature: 0.7,
-      maxTokens: 1000
+      maxTokens: 1000,
+      provider: 'yandex'
     };
 
     it('should create message with model info', async () => {
@@ -66,13 +67,15 @@ describe('Database Schema', () => {
           message: 'Test message',
           model: 'test-model',
           temperature: 0.7,
-          maxTokens: 1000
+          maxTokens: 1000,
+          provider: 'yandex'
         }
       });
 
       expect(message.model).toBe('test-model');
       expect(message.temperature).toBe(0.7);
       expect(message.maxTokens).toBe(1000);
+      expect(message.provider).toBe('yandex');
     });
 
     it('should find messages by chat id', async () => {
@@ -86,6 +89,7 @@ describe('Database Schema', () => {
 
       expect(messages).toHaveLength(1);
       expect(messages[0].chatId).toBe('test-chat-id');
+      expect(messages[0].provider).toBe('yandex');
     });
   });
 }); 
