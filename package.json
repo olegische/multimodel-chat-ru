@@ -20,7 +20,10 @@
     "prisma": "^5.22.0",
     "react": "18.x",
     "react-dom": "18.x",
-    "zod": "^3.x"
+    "zod": "^3.x",
+    "axios": "^1.6.2",
+    "date-fns": "^2.30.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
@@ -47,7 +50,8 @@
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
-    "typescript": "^5.x"
+    "typescript": "^5.x",
+    "@types/uuid": "^9.0.7"
   },
   "type": "module",
   "ts-node": {
