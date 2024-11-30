@@ -43,7 +43,7 @@ export default function GenerationSettings({
           type="number"
           min="1"
           max="2000"
-          value={maxTokens}
+          value={String(maxTokens)}
           onChange={(e) => 
             onSettingsChange({ 
               temperature, 

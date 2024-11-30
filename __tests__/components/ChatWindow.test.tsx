@@ -1,6 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import ChatWindow from '@/components/ChatWindow';
 
+// Add this before your test cases
+beforeEach(() => {
+  // Mock scrollIntoView
+  Element.prototype.scrollIntoView = jest.fn();
+});
+
 describe('ChatWindow Component', () => {
   const mockMessages = [
     {

@@ -5,6 +5,23 @@ import prismaClient from '@/lib/db';
 import { generateResponse } from '@/lib/yandexGpt';
 import { z } from 'zod';
 
+// At the top of your test file
+jest.mock('@prisma/client', () => ({
+  PrismaClient: jest.fn().mockImplementation(() => ({
+    chat: {
+      create: jest.fn(),
+      // ... other methods you use
+    },
+    message: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      // ... other methods you use
+    },
+    $connect: jest.fn(),
+    $disconnect: jest.fn(),
+  })),
+}));
+
 // Мокаем модули
 jest.mock('@/lib/db', () => {
   return {
@@ -58,21 +75,13 @@ describe('Chat API', () => {
   });
 
   it('should create a new chat and message', async () => {
-    // Подготавливаем моки
     const mockChat = { id: 'chat-123' };
-    const mockMessage = {
-      id: 1,
-      message: 'Test message',
-      response: 'Test response',
-      timestamp: new Date(),
-    };
+    const mockMessage = { id: 'message-123' };
 
-    (prismaClient.chat.create as jest.Mock).mockResolvedValue(mockChat);
-    (prismaClient.message.findMany as jest.Mock).mockResolvedValue([]);
-    (generateResponse as jest.Mock).mockResolvedValue('Test response');
-    (prismaClient.message.create as jest.Mock).mockResolvedValue(mockMessage);
+    prismaClient.chat.create.mockResolvedValue(mockChat);
+    prismaClient.message.findMany.mockResolvedValue([]);
+    prismaClient.message.create.mockResolvedValue(mockMessage);
 
-    // Создаем тестовый запрос
     const request = new ActualNextRequest('http://localhost:3000/api/chat', {
       method: 'POST',
       body: JSON.stringify({
@@ -83,17 +92,14 @@ describe('Chat API', () => {
       }),
     });
 
-    // Отправляем запрос
     const response = await POST(request);
     const data = await response.json();
 
-    // Проверяем результат
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
     expect(data.data.message).toEqual(mockMessage);
     expect(data.data.chatId).toBe(mockChat.id);
 
-    // Проверяем, что нужные функции были вызваны
     expect(prismaClient.chat.create).toHaveBeenCalled();
     expect(prismaClient.message.findMany).toHaveBeenCalled();
     expect(generateResponse).toHaveBeenCalled();
@@ -104,7 +110,6 @@ describe('Chat API', () => {
     const request = new ActualNextRequest('http://localhost:3000/api/chat', {
       method: 'POST',
       body: JSON.stringify({
-        // Отсутствует обязательное поле message
         temperature: 0.7,
         maxTokens: 1000,
       }),
@@ -119,8 +124,9 @@ describe('Chat API', () => {
   });
 
   it('should handle API errors', async () => {
-    (prismaClient.chat.create as jest.Mock).mockResolvedValue({ id: 'chat-123' });
-    (prismaClient.message.findMany as jest.Mock).mockResolvedValue([]);
+    prismaClient.chat.create.mockResolvedValue({ id: 'chat-123' });
+    prismaClient.message.findMany.mockResolvedValue([]);
+    prismaClient.message.create.mockResolvedValue({ id: 'message-123' });
     (generateResponse as jest.Mock).mockRejectedValue(new Error('API Error'));
 
     const request = new ActualNextRequest('http://localhost:3000/api/chat', {

@@ -48,6 +48,7 @@
     "form-data": "^4.0.1",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "jest-mock-extended": "^4.0.0-beta1",
     "node-fetch": "^2.7.0",
     "postcss": "^8.x",
     "prettier": "^3.x",

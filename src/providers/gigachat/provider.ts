@@ -1,0 +1,123 @@
+import { z } from 'zod';
+import axios from 'axios';
+import https from 'https';
+import { BaseProvider, ProviderConfig, ProviderMessage, GenerationOptions, GenerationResult } from '../base.provider';
+
+const responseSchema = z.object({
+  choices: z.array(
+    z.object({
+      message: z.object({
+        role: z.string(),
+        content: z.string()
+      })
+    })
+  ),
+  usage: z.object({
+    prompt_tokens: z.number(),
+    completion_tokens: z.number(),
+    total_tokens: z.number()
+  }).optional()
+});
+
+type GigaChatResponse = z.infer<typeof responseSchema>;
+
+export class GigaChatProvider extends BaseProvider {
+  private accessToken?: string;
+  private tokenExpiration?: number;
+
+  constructor(config: ProviderConfig) {
+    super(config, responseSchema);
+  }
+
+  async generateResponse(
+    message: string,
+    options?: GenerationOptions,
+    previousMessages?: ProviderMessage[]
+  ): Promise<GenerationResult> {
+    const validatedOptions = this.validateOptions(options);
+    await this.ensureValidToken();
+
+    try {
+      const response = await axios.post(
+        `${this.config.apiUrl}/chat/completions`,
+        {
+          model: 'GigaChat',
+          messages: this.formatMessages(message, previousMessages),
+          temperature: validatedOptions.temperature,
+          max_tokens: validatedOptions.maxTokens
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          httpsAgent: new https.Agent({ rejectUnauthorized: false })
+        }
+      );
+
+      const validated = this.validateResponse(response.data) as GigaChatResponse;
+
+      return {
+        text: validated.choices[0].message.content,
+        usage: validated.usage ? {
+          promptTokens: validated.usage.prompt_tokens,
+          completionTokens: validated.usage.completion_tokens,
+          totalTokens: validated.usage.total_tokens
+        } : undefined
+      };
+    } catch (error) {
+      throw this.formatError(error);
+    }
+  }
+
+  async listModels(): Promise<string[]> {
+    await this.ensureValidToken();
+
+    try {
+      const response = await axios.get(
+        `${this.config.apiUrl}/models`,
+        {
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`
+          },
+          httpsAgent: new https.Agent({ rejectUnauthorized: false })
+        }
+      );
+
+      return response.data.data.map((model: any) => model.id);
+    } catch (error) {
+      throw this.formatError(error);
+    }
+  }
+
+  private async ensureValidToken(): Promise<void> {
+    if (this.accessToken && this.tokenExpiration && Date.now() < this.tokenExpiration) {
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        'https://ngw.devices.sberbank.ru:9443/api/v2/oauth',
+        'scope=GIGACHAT_API_PERS',
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Basic ${this.config.credentials}`
+          },
+          httpsAgent: new https.Agent({ rejectUnauthorized: false })
+        }
+      );
+
+      this.accessToken = response.data.access_token;
+      this.tokenExpiration = Date.now() + 29 * 60 * 1000; // 29 minutes
+    } catch (error) {
+      throw this.formatError(error);
+    }
+  }
+
+  private formatMessages(message: string, previousMessages?: ProviderMessage[]): ProviderMessage[] {
+    const messages = previousMessages ? [...previousMessages] : [];
+    messages.push({ role: 'user', content: message });
+    return messages;
+  }
+} 
