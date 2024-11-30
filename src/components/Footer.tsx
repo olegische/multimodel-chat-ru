@@ -1,56 +1,91 @@
 'use client';
 
 import { useState } from 'react';
-import GenerationSettings from './GenerationSettings';
+import { ProviderType } from '@/providers/factory';
 
 interface FooterProps {
-  onSendMessage: (message: string, settings: { temperature: number; maxTokens: number }) => void;
+  provider: ProviderType;
+  temperature: number;
+  maxTokens: number;
+  onSettingsChange: (settings: { temperature: number; maxTokens: number }) => void;
   disabled?: boolean;
 }
 
-export default function Footer({ onSendMessage, disabled = false }: FooterProps) {
-  const [message, setMessage] = useState('');
-  const [settings, setSettings] = useState({
-    temperature: 0.7,
-    maxTokens: 1000
-  });
+export default function Footer({
+  provider,
+  temperature,
+  maxTokens,
+  onSettingsChange,
+  disabled = false
+}: FooterProps) {
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (message.trim() && !disabled) {
-      onSendMessage(message, settings);
-      setMessage('');
-    }
+  const handleTemperatureChange = (value: number) => {
+    onSettingsChange({ temperature: value, maxTokens });
+  };
+
+  const handleMaxTokensChange = (value: number) => {
+    onSettingsChange({ temperature, maxTokens: value });
   };
 
   return (
-    <footer className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-      <form onSubmit={handleSubmit} className="max-w-5xl mx-auto p-4 space-y-4">
-        <GenerationSettings
-          temperature={settings.temperature}
-          maxTokens={settings.maxTokens}
-          onSettingsChange={setSettings}
+    <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t dark:border-gray-800">
+      <div className="max-w-5xl mx-auto px-4 py-2">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           disabled={disabled}
-        />
-        
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Введите сообщение..."
-            className="flex-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={disabled}
-          />
-          <button
-            type="submit"
-            disabled={disabled || !message.trim()}
-            className="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Отправить
-          </button>
-        </div>
-      </form>
-    </footer>
+        >
+          <span>Настройки {provider}</span>
+          <span className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+            ▼
+          </span>
+        </button>
+
+        {isOpen && (
+          <div className="mt-4 space-y-4">
+            <div>
+              <label 
+                htmlFor="temperature" 
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Температура: {temperature}
+              </label>
+              <input
+                id="temperature"
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={temperature}
+                onChange={(e) => handleTemperatureChange(parseFloat(e.target.value))}
+                disabled={disabled}
+                className="w-full mt-1"
+              />
+            </div>
+
+            <div>
+              <label 
+                htmlFor="maxTokens" 
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Максимум токенов: {maxTokens}
+              </label>
+              <input
+                id="maxTokens"
+                type="range"
+                min="100"
+                max="2000"
+                step="100"
+                value={maxTokens}
+                onChange={(e) => handleMaxTokensChange(parseInt(e.target.value))}
+                disabled={disabled}
+                className="w-full mt-1"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 } 
