@@ -14,6 +14,7 @@ export interface ProviderMessage {
 export interface GenerationOptions {
   temperature?: number;
   maxTokens?: number;
+  model?: string;
 }
 
 export interface GenerationResult {
