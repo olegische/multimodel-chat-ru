@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Types
 interface YandexGPTConfig {
   apiUrl: string;
-  iamToken: string;
+  apiKey: string;
   folderId: string;
 }
 
@@ -70,11 +70,11 @@ const gptResponseSchema = z.object({
 const getConfig = (): YandexGPTConfig => {
   const config = {
     apiUrl: process.env.YANDEX_GPT_API_URL,
-    iamToken: process.env.YANDEX_IAM_TOKEN,
+    apiKey: process.env.YANDEX_API_KEY,
     folderId: process.env.YANDEX_FOLDER_ID,
   };
 
-  if (!config.apiUrl || !config.iamToken || !config.folderId) {
+  if (!config.apiUrl || !config.apiKey || !config.folderId) {
     throw new Error('Yandex GPT API configuration is missing');
   }
 
@@ -117,7 +117,7 @@ export async function generateResponse(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.iamToken}`,
+        'Authorization': `Api-Key ${config.apiKey}`,
         'x-folder-id': config.folderId
       },
       body: JSON.stringify({
