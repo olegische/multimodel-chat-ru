@@ -1,37 +1,77 @@
-import prismaClient from '../lib/db';
+import { PrismaClient } from '@prisma/client';
 
-async function main() {
+const prisma = new PrismaClient();
+
+async function testDatabase() {
   try {
-    // Создаем тестовый чат
-    const chat = await prismaClient.chat.create({
-      data: {}
-    })
-    console.log('✅ Тестовый чат создан:', chat)
-
-    // Добавляем тестовое сообщение
-    const message = await prismaClient.message.create({
+    // Тест создания чата
+    const chat = await prisma.chat.create({
       data: {
-        chatId: chat.id,
-        message: 'Тестовое сообщение',
-        response: 'Тестовый ответ от GPT',
-        temperature: 0.7,
-        maxTokens: 1000
+        provider: 'yandex',
+        messages: {
+          create: {
+            message: 'Test message',
+            response: 'Test response',
+            model: 'yandexgpt',
+            temperature: 0.7,
+            maxTokens: 1000
+          }
+        }
+      },
+      include: {
+        messages: true
       }
-    })
-    console.log('✅ Тестовое сообщение создано:', message)
+    });
 
-    // Проверяем связь
-    const chatWithMessages = await prismaClient.chat.findUnique({
-      where: { id: chat.id },
-      include: { messages: true }
-    })
-    console.log('✅ Чат с сообщениями:', chatWithMessages)
+    console.log('✅ Created chat:', chat);
+
+    // Тест поиска чата по провайдеру
+    const chats = await prisma.chat.findMany({
+      where: {
+        provider: 'yandex'
+      },
+      include: {
+        messages: true
+      }
+    });
+
+    console.log('✅ Found chats:', chats);
+
+    // Тест обновления сообщения
+    const updatedMessage = await prisma.message.update({
+      where: {
+        id: chat.messages[0].id
+      },
+      data: {
+        model: 'yandexgpt-pro'
+      }
+    });
+
+    console.log('✅ Updated message:', updatedMessage);
+
+    // Тест удаления
+    // Сначала удаляем все сообщения чата
+    await prisma.message.deleteMany({
+      where: {
+        chatId: chat.id
+      }
+    });
+
+    // Затем удаляем сам чат
+    await prisma.chat.delete({
+      where: {
+        id: chat.id
+      }
+    });
+
+    console.log('✅ Database test completed successfully');
 
   } catch (error) {
-    console.error('❌ Ошибка:', error)
+    console.error('❌ Database test failed:', error);
+    process.exit(1);
   } finally {
-    await prismaClient.$disconnect()
+    await prisma.$disconnect();
   }
 }
 
-main() 
+testDatabase(); 
