@@ -1,12 +1,13 @@
 import { NextRequest } from 'next/server';
 import { ChatService } from '@/services/chat.service';
 import { ProviderService } from '@/services/provider.service';
+import { ProviderType } from '@/providers/factory';
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const chatId = searchParams.get('chatId');
-    const provider = searchParams.get('provider');
+    const provider = searchParams.get('provider') as ProviderType;
 
     if (!chatId) {
       return new Response('Chat ID is required', { status: 400 });
