@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import axios from 'axios';
 import https from 'https';
@@ -71,9 +72,11 @@ export class GigaChatProvider extends BaseProvider {
   }
 
   async listModels(): Promise<string[]> {
-    await this.ensureValidToken();
-
     try {
+      console.log('Ensuring valid token for GigaChat');
+      await this.ensureValidToken();
+
+      console.log('Requesting GigaChat models');
       const response = await axios.get(
         `${this.config.apiUrl}/models`,
         {
@@ -84,24 +87,31 @@ export class GigaChatProvider extends BaseProvider {
         }
       );
 
-      return response.data.data.map((model: any) => model.id);
+      const models = response.data.data.map((model: any) => model.id);
+      console.log('Available GigaChat models:', models);
+      return models;
     } catch (error) {
+      console.error('Error listing GigaChat models:', error);
       throw this.formatError(error);
     }
   }
 
   private async ensureValidToken(): Promise<void> {
     if (this.accessToken && this.tokenExpiration && Date.now() < this.tokenExpiration) {
+      console.log('Using existing GigaChat token');
       return;
     }
 
     try {
+      console.log('Requesting new GigaChat token');
       const response = await axios.post(
         'https://ngw.devices.sberbank.ru:9443/api/v2/oauth',
         'scope=GIGACHAT_API_PERS',
         {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+            'RqUID': uuidv4(),
             'Authorization': `Basic ${this.config.credentials}`
           },
           httpsAgent: new https.Agent({ rejectUnauthorized: false })
@@ -110,7 +120,16 @@ export class GigaChatProvider extends BaseProvider {
 
       this.accessToken = response.data.access_token;
       this.tokenExpiration = Date.now() + 29 * 60 * 1000; // 29 minutes
+      console.log('Successfully obtained new GigaChat token');
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('GigaChat token error details:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message
+        });
+      }
       throw this.formatError(error);
     }
   }
