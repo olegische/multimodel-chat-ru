@@ -15,11 +15,15 @@ export class ProviderService {
     const available: ProviderType[] = [];
 
     for (const provider of providers) {
-      if (await this.isProviderAvailable(provider)) {
+      console.log(`Checking availability of provider: ${provider}`);
+      const isAvailable = await this.isProviderAvailable(provider);
+      console.log(`Provider ${provider} availability:`, isAvailable);
+      if (isAvailable) {
         available.push(provider);
       }
     }
 
+    console.log('Available providers:', available);
     return available;
   }
 
@@ -29,25 +33,33 @@ export class ProviderService {
 
     // Проверяем кэш
     if (status && now - status.lastCheck < this.checkInterval) {
+      console.log(`Using cached status for ${type}:`, status);
       return status.available;
     }
 
     try {
+      console.log(`Creating provider instance for ${type}`);
       const provider = ProviderFactory.createProvider(type);
+      console.log(`Listing models for ${type}`);
       await provider.listModels();
 
-      this.statusCache.set(type, {
+      const newStatus = {
         available: true,
         lastCheck: now
-      });
+      };
+      console.log(`Setting status for ${type}:`, newStatus);
+      this.statusCache.set(type, newStatus);
 
       return true;
     } catch (error) {
-      this.statusCache.set(type, {
+      console.error(`Error checking ${type} availability:`, error);
+      const newStatus = {
         available: false,
         lastCheck: now,
         error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      };
+      console.log(`Setting error status for ${type}:`, newStatus);
+      this.statusCache.set(type, newStatus);
 
       return false;
     }
