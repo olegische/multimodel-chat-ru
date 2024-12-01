@@ -1,66 +1,149 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Message } from '@prisma/client';
+import { ProviderType } from '@/providers/factory';
 import Header from '@/components/Header';
 import ChatWindow from '@/components/ChatWindow';
 import Footer from '@/components/Footer';
-import { YandexGPTModel } from '@/lib/yandexGpt';
-
-interface Message {
-  id: number;
-  message: string;
-  response: string;
-  timestamp: Date;
-}
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<YandexGPTModel>('YandexGPT Pro RC');
+  const [error, setError] = useState<string | null>(null);
+  const [provider, setProvider] = useState<ProviderType>('yandex');
+  const [model, setModel] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  const [settings, setSettings] = useState({
+    temperature: 0.7,
+    maxTokens: 1000
+  });
 
-  const handleSendMessage = async (
-    message: string, 
-    settings: { temperature: number; maxTokens: number }
-  ) => {
-    setLoading(true);
+  useEffect(() => {
+    // Загружаем модель по умолчанию для выбранного провайдера
+    async function loadDefaultModel() {
+      try {
+        const response = await fetch(`/api/models?provider=${provider}`);
+        if (!response.ok) throw new Error('Failed to load models');
+        const models = await response.json();
+        setModel(models[0] || '');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      }
+    }
+
+    loadDefaultModel();
+  }, [provider]);
+
+  const handleSendMessage = async (message: string) => {
+    if (!message.trim()) return;
+    
+    const tempId = Date.now();
+    
     try {
+      setLoading(true);
+      setError(null);
+      
+      // Создаем временное сообщение пользователя
+      const tempMessage: Message = {
+        id: tempId,
+        chatId: 'temp',
+        message: message.trim(),
+        response: null,
+        model: model,
+        provider: provider,
+        temperature: settings.temperature,
+        maxTokens: settings.maxTokens,
+        timestamp: new Date()
+      };
+      
+      // Добавляем сообщение пользователя немедленно
+      setMessages(prev => [...prev, tempMessage]);
+      setInputValue('');
+
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message,
-          model: selectedModel,
-          temperature: settings.temperature,
-          maxTokens: settings.maxTokens,
-        }),
+          provider,
+          options: {
+            model,
+            temperature: settings.temperature,
+            maxTokens: settings.maxTokens
+          }
+        })
       });
 
-      const data = await response.json();
-      if (data.success) {
-        setMessages((prev) => [...prev, data.data.message]);
+      if (!response.ok) {
+        throw new Error('Failed to send message');
       }
-    } catch (error) {
-      console.error('Error sending message:', error);
+
+      const data = await response.json();
+      
+      // Заменяем временное сообщение на полученное от сервера
+      setMessages(prev => prev.map(msg => 
+        msg.id === tempId ? {
+          ...tempMessage,
+          response: data.response,
+          model: data.model
+        } : msg
+      ));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send message');
+      // Удаляем временное сообщение в случае ошибки
+      setMessages(prev => prev.filter(msg => msg.id !== tempId));
     } finally {
       setLoading(false);
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && !loading) {
+      e.preventDefault();
+      handleSendMessage(inputValue);
+    }
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 relative">
+    <div className="flex flex-col h-screen">
       <Header 
-        selectedModel={selectedModel}
-        onModelChange={setSelectedModel}
+        provider={provider}
+        onProviderChange={setProvider}
+      />
+      <ChatWindow 
+        messages={messages}
+        provider={provider}
+        loading={loading}
+        error={error}
+      />
+      <div className="border-t border-gray-200 dark:border-gray-800 p-4">
+        <div className="max-w-5xl mx-auto flex gap-2">
+          <input
+            type="text"
+            placeholder="Введите сообщение..."
+            className="flex-1 p-2 border rounded dark:bg-gray-800 dark:border-gray-700"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={loading}
+          />
+          <button
+            onClick={() => handleSendMessage(inputValue)}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+            disabled={loading}
+          >
+            Отправить
+          </button>
+        </div>
+      </div>
+      <Footer
+        provider={provider}
+        temperature={settings.temperature}
+        maxTokens={settings.maxTokens}
+        onSettingsChange={setSettings}
         disabled={loading}
       />
-      <main className="flex-1 overflow-hidden mt-16 mb-24 max-w-5xl mx-auto w-full">
-        <div className="h-full overflow-y-auto">
-          <ChatWindow messages={messages} loading={loading} />
-        </div>
-      </main>
-      <Footer onSendMessage={handleSendMessage} disabled={loading} />
     </div>
   );
 }
