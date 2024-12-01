@@ -110,6 +110,9 @@ export default function Home() {
       <Header 
         provider={provider}
         onProviderChange={setProvider}
+        model={model}
+        onModelChange={setModel}
+        disabled={loading}
       />
       <ChatWindow 
         messages={messages}
