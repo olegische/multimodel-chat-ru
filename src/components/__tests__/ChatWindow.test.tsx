@@ -70,7 +70,7 @@ describe('ChatWindow', () => {
     );
 
     const copyButtons = screen.getAllByTitle('Копировать текст');
-    fireEvent.click(copyButtons[1]); // Provider response copy button
+    fireEvent.click(copyButtons[1]); // Provider response copy button is still second in the list
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Hi there!');
   });
@@ -105,5 +105,19 @@ describe('ChatWindow', () => {
 
     expect(screen.getByText('yandex')).toBeInTheDocument();
     expect(screen.getByText('Вы')).toBeInTheDocument();
+  });
+
+  it('should show copy buttons in correct positions', () => {
+    render(
+      <ThemeProvider>
+        <ChatWindow messages={mockMessages} provider="yandex" />
+      </ThemeProvider>
+    );
+
+    const userMessage = screen.getByText('Hello').closest('.group');
+    const providerResponse = screen.getByText('Hi there!').closest('.group');
+
+    expect(userMessage?.querySelector('button[title="Копировать текст"]')).toBeInTheDocument();
+    expect(providerResponse?.querySelector('button[title="Копировать текст"]')).toBeInTheDocument();
   });
 }); 

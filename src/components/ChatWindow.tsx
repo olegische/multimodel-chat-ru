@@ -65,18 +65,18 @@ const UserMessage = ({ message }: { message: string }) => (
 const ProviderResponse = ({ response, model, provider, currentProvider }: { response: string; model?: string | null; provider?: string | null; currentProvider: ProviderType }) => (
   <div className="flex justify-start">
     <div className="inline-block max-w-[80%] p-4 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 group">
-      <div className="flex items-center justify-between mb-1">
-        <div className="text-sm">{provider || currentProvider}</div>
-        <CopyButton text={response} />
-      </div>
+      <div className="text-sm mb-1">{provider || currentProvider}</div>
       <div className="whitespace-pre-wrap break-words" data-testid="provider-response">
         {response}
       </div>
-      {model && (
-        <div className="mt-2 text-xs opacity-70">
-          Модель: {model}
-        </div>
-      )}
+      <div className="mt-2 flex items-center justify-between">
+        {model && (
+          <div className="text-xs opacity-70">
+            Модель: {model}
+          </div>
+        )}
+        <CopyButton text={response} />
+      </div>
     </div>
   </div>
 );
