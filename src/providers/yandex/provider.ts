@@ -100,10 +100,4 @@ export class YandexGPTProvider extends BaseProvider {
       'YandexGPT Pro 32k RC'
     ];
   }
-
-  private formatMessages(message: string, previousMessages?: ProviderMessage[]): ProviderMessage[] {
-    const messages = previousMessages ? [...previousMessages] : [];
-    messages.push({ role: 'user', content: message });
-    return messages;
-  }
 } 

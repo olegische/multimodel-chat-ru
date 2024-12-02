@@ -39,11 +39,16 @@ export class GigaChatProvider extends BaseProvider {
     await this.ensureValidToken();
 
     try {
+      console.log('Generating response with options:', validatedOptions);
+      
+      const messages = this.formatMessages(message, previousMessages);
+      console.log('Formatted messages:', messages);
+
       const response = await axios.post(
         `${this.config.apiUrl}/chat/completions`,
         {
           model: 'GigaChat',
-          messages: this.formatMessages(message, previousMessages),
+          messages: messages,
           temperature: validatedOptions.temperature,
           max_tokens: validatedOptions.maxTokens
         },
@@ -56,6 +61,7 @@ export class GigaChatProvider extends BaseProvider {
         }
       );
 
+      console.log('Raw API response:', JSON.stringify(response.data, null, 2));
       const validated = this.validateResponse(response.data) as GigaChatResponse;
 
       return {
@@ -67,6 +73,7 @@ export class GigaChatProvider extends BaseProvider {
         } : undefined
       };
     } catch (error) {
+      console.error('Error in GigaChatProvider:', error);
       throw this.formatError(error);
     }
   }
@@ -132,11 +139,5 @@ export class GigaChatProvider extends BaseProvider {
       }
       throw this.formatError(error);
     }
-  }
-
-  private formatMessages(message: string, previousMessages?: ProviderMessage[]): ProviderMessage[] {
-    const messages = previousMessages ? [...previousMessages] : [];
-    messages.push({ role: 'user', content: message });
-    return messages;
   }
 } 

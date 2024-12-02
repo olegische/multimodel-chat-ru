@@ -1,9 +1,11 @@
 import { z } from 'zod';
+import { SYSTEM_PROMPTS, SystemPromptType } from '@/config/prompts';
 
 // Общие типы для всех провайдеров
 export interface ProviderConfig {
   apiUrl: string;
   credentials: string;
+  systemPrompt?: SystemPromptType;
 }
 
 export interface ProviderMessage {
@@ -30,10 +32,12 @@ export interface GenerationResult {
 export abstract class BaseProvider {
   protected config: ProviderConfig;
   protected responseSchema: z.ZodType;
+  protected systemPrompt: string;
 
   constructor(config: ProviderConfig, responseSchema: z.ZodType) {
     this.config = config;
     this.responseSchema = responseSchema;
+    this.systemPrompt = SYSTEM_PROMPTS[config.systemPrompt || 'default'];
   }
 
   // Абстрактные методы, которые должны быть реализованы в каждом провайдере
@@ -62,5 +66,18 @@ export abstract class BaseProvider {
       temperature: options?.temperature ?? 0.7,
       maxTokens: options?.maxTokens ?? 1000
     };
+  }
+
+  protected formatMessages(message: string, previousMessages?: ProviderMessage[]): ProviderMessage[] {
+    const messages: ProviderMessage[] = [
+      { role: 'system', content: this.systemPrompt }
+    ];
+
+    if (previousMessages) {
+      messages.push(...previousMessages);
+    }
+
+    messages.push({ role: 'user', content: message });
+    return messages;
   }
 } 

@@ -13,7 +13,8 @@ export class ProviderFactory {
         console.log('Creating YandexGPT provider with URL:', process.env.YANDEX_GPT_API_URL);
         return new YandexGPTProvider({
           apiUrl: process.env.YANDEX_GPT_API_URL!,
-          credentials: process.env.YANDEX_API_KEY!
+          credentials: process.env.YANDEX_API_KEY!,
+          systemPrompt: 'yandex'
         });
       case 'gigachat':
         console.log('Creating GigaChat provider with URL:', process.env.GIGACHAT_API_URL);
@@ -26,7 +27,8 @@ export class ProviderFactory {
         }
         return new GigaChatProvider({
           apiUrl: process.env.GIGACHAT_API_URL,
-          credentials: process.env.GIGACHAT_CREDENTIALS
+          credentials: process.env.GIGACHAT_CREDENTIALS,
+          systemPrompt: 'gigachat'
         });
       default:
         throw new Error(`Unknown provider type: ${type}`);
