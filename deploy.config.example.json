@@ -1,0 +1,22 @@
+{
+  "registry": {
+    "id": "your_registry_id_here",
+    "url": "cr.yandex"
+  },
+  "app": {
+    "name": "multimodel-chat",
+    "version": "2.0.0"
+  },
+  "container": {
+    "name": "cr.yandex/${registry.id}/${app.name}:${app.version}",
+    "platform": "linux/amd64",
+    "ports": {
+      "internal": 3000,
+      "external": 3000
+    }
+  },
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  }
+} 

@@ -2,6 +2,7 @@
 /node_modules
 /.pnp
 .pnp.js
+.yarn/install-state.gz
 
 # Testing
 /coverage
@@ -82,3 +83,6 @@ logs
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Deployment
+deploy.config.json
