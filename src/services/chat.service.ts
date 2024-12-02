@@ -1,5 +1,6 @@
 import { ProviderFactory, ProviderType } from '@/providers/factory';
 import { GenerationOptions, ProviderMessage } from '@/providers/base.provider';
+import { GENERATION_CONFIG } from '@/config/generation';
 import prisma from '@/lib/db';
 
 export class ChatService {
@@ -54,10 +55,10 @@ export class ChatService {
           chatId: chat.id,
           message: message,
           response: response.text,
-          model: options?.model,
+          model: options?.model || 'default',
           provider: this.provider.constructor.name.replace('Provider', '').toLowerCase(),
-          temperature: options?.temperature,
-          maxTokens: options?.maxTokens
+          temperature: options?.temperature || GENERATION_CONFIG.temperature.default,
+          maxTokens: options?.maxTokens || GENERATION_CONFIG.maxTokens.default
         }
       });
 

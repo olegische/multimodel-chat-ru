@@ -1,8 +1,9 @@
 import { ChatService } from '../chat.service';
 import { ProviderFactory } from '@/providers/factory';
-import { BaseProvider } from '@/providers/base.provider';
+import { GENERATION_CONFIG } from '@/config/generation';
 import prisma from '@/lib/db';
 import { z } from 'zod';
+import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended';
 
 // Мокаем зависимости
 jest.mock('@/providers/factory');
@@ -34,13 +35,13 @@ describe('ChatService', () => {
 
   const mockMessage = {
     id: 1,
-    chatId: mockChat.id,
+    chatId: 'test-chat-id',
     message: 'Test message',
     response: 'Test response',
     model: 'test-model',
     timestamp: new Date(),
-    temperature: 0.7,
-    maxTokens: 1000,
+    temperature: GENERATION_CONFIG.temperature.default,
+    maxTokens: GENERATION_CONFIG.maxTokens.default,
     provider: 'yandex'
   };
 

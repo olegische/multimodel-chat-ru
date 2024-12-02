@@ -29,11 +29,11 @@ model Message {
   chat        Chat     @relation(fields: [chatId], references: [id])
   message     String   // Сообщение пользователя
   response    String?  // Ответ от модели
-  model       String?  // Используемая модель
-  provider    String?  // Провайдер, который сгенерировал ответ
+  model       String   // Используемая модель
+  provider    String   // Провайдер, который сгенерировал ответ
   timestamp   DateTime @default(now())
-  temperature Float?   // Параметр температуры
-  maxTokens   Int?     // Максимальное количество токенов
+  temperature Float    // Параметр температуры
+  maxTokens   Int      // Максимальное количество токенов
 
   @@index([chatId])
   @@index([timestamp])

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ProviderType } from '@/providers/factory';
+import { GENERATION_CONFIG } from '@/config/generation';
 
 interface FooterProps {
   provider: ProviderType;
@@ -54,9 +55,9 @@ export default function Footer({
               <input
                 id="temperature"
                 type="range"
-                min="0"
-                max="1"
-                step="0.1"
+                min={GENERATION_CONFIG.temperature.min}
+                max={GENERATION_CONFIG.temperature.max}
+                step={GENERATION_CONFIG.temperature.step}
                 value={temperature}
                 onChange={(e) => handleTemperatureChange(parseFloat(e.target.value))}
                 disabled={disabled}
@@ -74,9 +75,9 @@ export default function Footer({
               <input
                 id="maxTokens"
                 type="range"
-                min="100"
-                max="2000"
-                step="100"
+                min={GENERATION_CONFIG.maxTokens.min}
+                max={GENERATION_CONFIG.maxTokens.max}
+                step={GENERATION_CONFIG.maxTokens.step}
                 value={maxTokens}
                 onChange={(e) => handleMaxTokensChange(parseInt(e.target.value))}
                 disabled={disabled}

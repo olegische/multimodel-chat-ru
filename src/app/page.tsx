@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Message } from '@prisma/client';
 import { ProviderType } from '@/providers/factory';
+import { GENERATION_CONFIG } from '@/config/generation';
 import Header from '@/components/Header';
 import ChatWindow from '@/components/ChatWindow';
 import Footer from '@/components/Footer';
@@ -15,8 +16,8 @@ export default function Home() {
   const [model, setModel] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [settings, setSettings] = useState({
-    temperature: 0.7,
-    maxTokens: 1000
+    temperature: GENERATION_CONFIG.temperature.default,
+    maxTokens: GENERATION_CONFIG.maxTokens.default
   });
   const [isProvidersLoading, setIsProvidersLoading] = useState(true);
   const [isModelsLoading, setIsModelsLoading] = useState(true);
@@ -79,6 +80,7 @@ export default function Home() {
         message: message.trim(),
         response: null,
         model: model,
+        provider: provider,
         temperature: settings.temperature,
         maxTokens: settings.maxTokens,
         timestamp: new Date()
