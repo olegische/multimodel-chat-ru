@@ -45,17 +45,16 @@ export default function Home() {
       setError(null);
       
       // Создаем временное сообщение пользователя
-      const tempMessage: Message = {
+      const tempMessage = {
         id: tempId,
         chatId: 'temp',
         message: message.trim(),
         response: null,
         model: model,
-        provider: provider,
         temperature: settings.temperature,
         maxTokens: settings.maxTokens,
         timestamp: new Date()
-      };
+      } as Message;
       
       // Добавляем сообщение пользователя немедленно
       setMessages(prev => [...prev, tempMessage]);
@@ -80,16 +79,17 @@ export default function Home() {
       }
 
       const data = await response.json();
+      console.log('API Response:', data); // Debug log
       
       // Заменяем временное сообщение на полученное от сервера
       setMessages(prev => prev.map(msg => 
         msg.id === tempId ? {
-          ...tempMessage,
-          response: data.response,
-          model: data.model
+          ...data.message,
+          id: msg.id // Сохраняем временный ID для стабильности UI
         } : msg
       ));
     } catch (err) {
+      console.error('Error sending message:', err); // Debug log
       setError(err instanceof Error ? err.message : 'Failed to send message');
       // Удаляем временное сообщение в случае ошибки
       setMessages(prev => prev.filter(msg => msg.id !== tempId));

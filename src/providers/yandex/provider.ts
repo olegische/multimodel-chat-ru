@@ -34,6 +34,28 @@ export class YandexGPTProvider extends BaseProvider {
     const validatedOptions = this.validateOptions(options);
 
     try {
+      console.log('Generating response with options:', validatedOptions);
+      
+      const messages = this.formatMessages(message, previousMessages);
+      console.log('Formatted messages:', messages);
+
+      const yandexMessages = messages.map(msg => ({
+        role: msg.role,
+        text: msg.content
+      }));
+
+      const requestBody = {
+        modelUri: `gpt://${process.env.YANDEX_FOLDER_ID}/yandexgpt-lite/latest`,
+        messages: yandexMessages,
+        completionOptions: {
+          stream: false,
+          temperature: validatedOptions.temperature,
+          maxTokens: validatedOptions.maxTokens
+        }
+      };
+
+      console.log('Request body:', JSON.stringify(requestBody, null, 2));
+
       const response = await fetch(this.config.apiUrl, {
         method: 'POST',
         headers: {
@@ -41,22 +63,18 @@ export class YandexGPTProvider extends BaseProvider {
           'Authorization': `Api-Key ${this.config.credentials}`,
           'x-folder-id': process.env.YANDEX_FOLDER_ID!
         },
-        body: JSON.stringify({
-          modelUri: `gpt://${process.env.YANDEX_FOLDER_ID}/yandexgpt/latest`,
-          completionOptions: {
-            stream: false,
-            temperature: validatedOptions.temperature,
-            maxTokens: validatedOptions.maxTokens
-          },
-          messages: this.formatMessages(message, previousMessages)
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
-        throw new Error(`YandexGPT API error: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Yandex API error response:', errorText);
+        throw new Error(`YandexGPT API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('Raw API response:', JSON.stringify(data, null, 2));
+      
       const validated = this.validateResponse(data) as YandexGPTResponse;
 
       return {
@@ -68,6 +86,7 @@ export class YandexGPTProvider extends BaseProvider {
         } : undefined
       };
     } catch (error) {
+      console.error('Error in YandexGPTProvider:', error);
       throw this.formatError(error);
     }
   }
