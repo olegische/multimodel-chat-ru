@@ -24,10 +24,10 @@ const UserMessage = ({ message }: { message: string }) => (
 );
 
 // Компонент ответа провайдера
-const ProviderResponse = ({ response, model, provider }: { response: string; model?: string | null; provider: ProviderType }) => (
+const ProviderResponse = ({ response, model, provider }: { response: string; model?: string | null; provider?: string | null }) => (
   <div className="flex justify-start">
     <div className="inline-block max-w-[80%] p-4 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-      <div className="text-sm mb-1">{provider}</div>
+      <div className="text-sm mb-1">{provider || 'Unknown Provider'}</div>
       <div className="whitespace-pre-wrap break-words" data-testid="provider-response">
         {response}
       </div>
@@ -41,7 +41,7 @@ const ProviderResponse = ({ response, model, provider }: { response: string; mod
 );
 
 // Компонент сообщения с ответом
-const MessageWithResponse = ({ message, response, model, provider }: { message: string; response?: string | null; model?: string | null; provider: ProviderType }) => (
+const MessageWithResponse = ({ message, response, model, provider }: { message: string; response?: string | null; model?: string | null; provider?: string | null }) => (
   <div className="space-y-4">
     <UserMessage message={message} />
     {response && (
@@ -78,7 +78,7 @@ const ErrorState = ({ error }: { error: string }) => (
 );
 
 // Компонент списка сообщений
-const MessageList = ({ messages, provider }: { messages: Message[]; provider: ProviderType }) => (
+const MessageList = ({ messages, currentProvider }: { messages: Message[]; currentProvider: ProviderType }) => (
   <div className="space-y-4">
     {messages.map((msg) => (
       <MessageWithResponse 
@@ -86,7 +86,7 @@ const MessageList = ({ messages, provider }: { messages: Message[]; provider: Pr
         message={msg.message}
         response={msg.response}
         model={msg.model}
-        provider={provider}
+        provider={msg.provider}
       />
     ))}
   </div>
@@ -113,7 +113,7 @@ export default function ChatWindow({
       ) : messages.length === 0 ? (
         <EmptyState />
       ) : (
-        <MessageList messages={messages} provider={provider} />
+        <MessageList messages={messages} currentProvider={provider} />
       )}
       {loading && <LoadingIndicator provider={provider} />}
       <div ref={bottomRef} />

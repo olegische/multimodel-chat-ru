@@ -55,6 +55,7 @@ export class ChatService {
           message: message,
           response: response.text,
           model: options?.model,
+          provider: this.provider.constructor.name.replace('Provider', '').toLowerCase(),
           temperature: options?.temperature,
           maxTokens: options?.maxTokens
         }
