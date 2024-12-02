@@ -1,22 +1,31 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider } from 'next-themes';
 import ChatWindow from '../ChatWindow';
 import { Message } from '@prisma/client';
 
+// Mock clipboard API
+Object.assign(navigator, {
+  clipboard: {
+    writeText: jest.fn()
+  }
+});
+
 describe('ChatWindow', () => {
-  const mockMessages: Message[] = [
-    {
-      id: 1,
-      chatId: 'test-chat',
-      message: 'Hello',
-      response: 'Hi there!',
-      model: 'test-model',
-      provider: 'yandex',
-      temperature: 0.7,
-      maxTokens: 1000,
-      timestamp: new Date()
-    }
-  ];
+  const mockMessages = [{
+    id: 1,
+    chatId: 'test-chat',
+    message: 'Hello',
+    response: 'Hi there!',
+    model: 'test-model',
+    provider: 'yandex',
+    temperature: 0.3,
+    maxTokens: 2000,
+    timestamp: new Date()
+  }] as unknown as Message[];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('should render empty state', () => {
     render(
@@ -38,6 +47,32 @@ describe('ChatWindow', () => {
     expect(screen.getByText('Hello')).toBeInTheDocument();
     expect(screen.getByText('Hi there!')).toBeInTheDocument();
     expect(screen.getByText('Модель: test-model')).toBeInTheDocument();
+  });
+
+  it('should copy user message to clipboard', async () => {
+    render(
+      <ThemeProvider>
+        <ChatWindow messages={mockMessages} provider="yandex" />
+      </ThemeProvider>
+    );
+
+    const copyButtons = screen.getAllByTitle('Копировать текст');
+    fireEvent.click(copyButtons[0]); // User message copy button
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Hello');
+  });
+
+  it('should copy provider response to clipboard', async () => {
+    render(
+      <ThemeProvider>
+        <ChatWindow messages={mockMessages} provider="yandex" />
+      </ThemeProvider>
+    );
+
+    const copyButtons = screen.getAllByTitle('Копировать текст');
+    fireEvent.click(copyButtons[1]); // Provider response copy button
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Hi there!');
   });
 
   it('should show loading state', () => {
