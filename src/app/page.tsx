@@ -18,22 +18,50 @@ export default function Home() {
     temperature: 0.7,
     maxTokens: 1000
   });
+  const [isProvidersLoading, setIsProvidersLoading] = useState(true);
+  const [isModelsLoading, setIsModelsLoading] = useState(true);
 
   useEffect(() => {
     // Загружаем модель по умолчанию для выбранного провайдера
     async function loadDefaultModel() {
       try {
+        setIsModelsLoading(true);
         const response = await fetch(`/api/models?provider=${provider}`);
         if (!response.ok) throw new Error('Failed to load models');
         const models = await response.json();
         setModel(models[0] || '');
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setIsModelsLoading(false);
       }
     }
 
     loadDefaultModel();
   }, [provider]);
+
+  // Загрузка списка провайдеров
+  useEffect(() => {
+    async function loadProviders() {
+      try {
+        setIsProvidersLoading(true);
+        const response = await fetch('/api/providers');
+        if (!response.ok) throw new Error('Failed to load providers');
+        const data = await response.json();
+        // Если текущий провайдер недоступен, выбираем первый доступный
+        const availableProviders = data.filter((p: any) => p.status.available);
+        if (availableProviders.length > 0 && !availableProviders.some((p: any) => p.id === provider)) {
+          setProvider(availableProviders[0].id);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setIsProvidersLoading(false);
+      }
+    }
+
+    loadProviders();
+  }, []);
 
   const handleSendMessage = async (message: string) => {
     if (!message.trim()) return;
@@ -105,6 +133,8 @@ export default function Home() {
     }
   };
 
+  const isInitializing = isProvidersLoading || isModelsLoading;
+
   return (
     <div className="flex flex-col h-screen">
       <Header 
@@ -113,6 +143,8 @@ export default function Home() {
         model={model}
         onModelChange={setModel}
         disabled={loading}
+        isProvidersLoading={isProvidersLoading}
+        isModelsLoading={isModelsLoading}
       />
       <ChatWindow 
         messages={messages}
@@ -124,19 +156,19 @@ export default function Home() {
         <div className="max-w-5xl mx-auto flex gap-2">
           <input
             type="text"
-            placeholder="Введите сообщение..."
+            placeholder={isInitializing ? "Загрузка..." : "Введите сообщение..."}
             className="flex-1 p-2 border rounded dark:bg-gray-800 dark:border-gray-700"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={loading}
+            disabled={loading || isInitializing}
           />
           <button
             onClick={() => handleSendMessage(inputValue)}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-            disabled={loading}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading || isInitializing}
           >
-            Отправить
+            {isInitializing ? "Загрузка..." : "Отправить"}
           </button>
         </div>
       </div>
@@ -145,7 +177,7 @@ export default function Home() {
         temperature={settings.temperature}
         maxTokens={settings.maxTokens}
         onSettingsChange={setSettings}
-        disabled={loading}
+        disabled={loading || isInitializing}
       />
     </div>
   );

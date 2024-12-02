@@ -7,6 +7,7 @@ interface ProviderSelectorProps {
   selectedProvider: ProviderType;
   onProviderChange: (provider: ProviderType) => void;
   disabled?: boolean;
+  isLoading?: boolean;
 }
 
 interface ProviderStatus {
@@ -20,10 +21,10 @@ interface ProviderStatus {
 export default function ProviderSelector({
   selectedProvider,
   onProviderChange,
-  disabled = false
+  disabled = false,
+  isLoading = false
 }: ProviderSelectorProps) {
   const [providers, setProviders] = useState<ProviderStatus[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,21 +37,11 @@ export default function ProviderSelector({
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
       }
     }
 
     loadProviders();
   }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-        <span>Загрузка провайдеров...</span>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -69,14 +60,18 @@ export default function ProviderSelector({
         id="provider"
         value={selectedProvider}
         onChange={(e) => onProviderChange(e.target.value as ProviderType)}
-        disabled={disabled}
-        className="px-2 py-1 border rounded bg-white dark:bg-gray-800 dark:border-gray-700"
+        disabled={disabled || isLoading}
+        className="px-2 py-1 border rounded bg-white dark:bg-gray-800 dark:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {providers.map(({ id, status }) => (
-          <option key={id} value={id} disabled={!status.available}>
-            {id} {!status.available && '(недоступен)'}
-          </option>
-        ))}
+        {isLoading ? (
+          <option value="">Загрузка...</option>
+        ) : (
+          providers.map(({ id, status }) => (
+            <option key={id} value={id} disabled={!status.available}>
+              {id} {!status.available && '(недоступен)'}
+            </option>
+          ))
+        )}
       </select>
     </div>
   );

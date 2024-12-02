@@ -8,22 +8,22 @@ interface ModelSelectorProps {
   provider: ProviderType;
   onModelChange: (model: string) => void;
   disabled?: boolean;
+  isLoading?: boolean;
 }
 
 export default function ModelSelector({
   selectedModel,
   provider,
   onModelChange,
-  disabled = false
+  disabled = false,
+  isLoading = false
 }: ModelSelectorProps) {
   const [models, setModels] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadModels() {
       try {
-        setLoading(true);
         const response = await fetch(`/api/models?provider=${provider}`);
         if (!response.ok) throw new Error('Failed to load models');
         const data = await response.json();
@@ -31,21 +31,11 @@ export default function ModelSelector({
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
       }
     }
 
     loadModels();
   }, [provider]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-        <span>Загрузка моделей...</span>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -64,14 +54,18 @@ export default function ModelSelector({
         id="model"
         value={selectedModel}
         onChange={(e) => onModelChange(e.target.value)}
-        disabled={disabled}
-        className="px-2 py-1 border rounded bg-white dark:bg-gray-800 dark:border-gray-700"
+        disabled={disabled || isLoading}
+        className="px-2 py-1 border rounded bg-white dark:bg-gray-800 dark:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {models.map((model) => (
-          <option key={model} value={model}>
-            {model}
-          </option>
-        ))}
+        {isLoading ? (
+          <option value="">Загрузка...</option>
+        ) : (
+          models.map((model) => (
+            <option key={model} value={model}>
+              {model}
+            </option>
+          ))
+        )}
       </select>
     </div>
   );

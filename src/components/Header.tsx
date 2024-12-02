@@ -11,6 +11,8 @@ interface HeaderProps {
   model: string;
   onModelChange: (model: string) => void;
   disabled?: boolean;
+  isProvidersLoading?: boolean;
+  isModelsLoading?: boolean;
 }
 
 export default function Header({ 
@@ -18,7 +20,9 @@ export default function Header({
   onProviderChange, 
   model,
   onModelChange,
-  disabled 
+  disabled,
+  isProvidersLoading = false,
+  isModelsLoading = false
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-2 bg-white border-b dark:bg-gray-900 dark:border-gray-800">
@@ -28,12 +32,14 @@ export default function Header({
           selectedProvider={provider}
           onProviderChange={onProviderChange}
           disabled={disabled}
+          isLoading={isProvidersLoading}
         />
         <ModelSelector
           selectedModel={model}
           provider={provider}
           onModelChange={onModelChange}
           disabled={disabled}
+          isLoading={isModelsLoading}
         />
         <ThemeToggle />
       </div>
