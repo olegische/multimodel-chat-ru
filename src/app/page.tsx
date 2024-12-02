@@ -8,6 +8,11 @@ import Header from '@/components/Header';
 import ChatWindow from '@/components/ChatWindow';
 import Footer from '@/components/Footer';
 
+interface GenerationSettings {
+  temperature: number;
+  maxTokens: number;
+}
+
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -15,7 +20,7 @@ export default function Home() {
   const [provider, setProvider] = useState<ProviderType>('yandex');
   const [model, setModel] = useState('');
   const [inputValue, setInputValue] = useState('');
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<GenerationSettings>({
     temperature: GENERATION_CONFIG.temperature.default,
     maxTokens: GENERATION_CONFIG.maxTokens.default
   });
@@ -50,8 +55,12 @@ export default function Home() {
         if (!response.ok) throw new Error('Failed to load providers');
         const data = await response.json();
         // Если текущий провайдер недоступен, выбираем первый доступный
-        const availableProviders = data.filter((p: any) => p.status.available);
-        if (availableProviders.length > 0 && !availableProviders.some((p: any) => p.id === provider)) {
+        interface ProviderStatus {
+          id: ProviderType;
+          status: { available: boolean };
+        }
+        const availableProviders = data.filter((p: ProviderStatus) => p.status.available);
+        if (availableProviders.length > 0 && !availableProviders.some((p: ProviderStatus) => p.id === provider)) {
           setProvider(availableProviders[0].id);
         }
       } catch (err) {
@@ -62,7 +71,7 @@ export default function Home() {
     }
 
     loadProviders();
-  }, []);
+  }, [provider]);
 
   const handleSendMessage = async (message: string) => {
     if (!message.trim()) return;
@@ -135,6 +144,10 @@ export default function Home() {
     }
   };
 
+  const handleSettingsChange = (newSettings: GenerationSettings) => {
+    setSettings(newSettings);
+  };
+
   const isInitializing = isProvidersLoading || isModelsLoading;
 
   return (
@@ -178,7 +191,7 @@ export default function Home() {
         provider={provider}
         temperature={settings.temperature}
         maxTokens={settings.maxTokens}
-        onSettingsChange={setSettings}
+        onSettingsChange={handleSettingsChange}
         disabled={loading || isInitializing}
       />
     </div>

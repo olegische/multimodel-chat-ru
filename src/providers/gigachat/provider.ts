@@ -140,4 +140,11 @@ export class GigaChatProvider extends BaseProvider {
       throw this.formatError(error);
     }
   }
+
+  protected formatError(error: unknown): Error {
+    if (error instanceof Error) {
+      return error;
+    }
+    return new Error('Unknown error occurred in GigaChat provider');
+  }
 } 

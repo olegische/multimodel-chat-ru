@@ -9,13 +9,14 @@ async function testDatabase() {
       data: {
         provider: 'yandex',
         messages: {
-          create: {
+          create: [{
             message: 'Test message',
             response: 'Test response',
             model: 'yandexgpt',
+            provider: 'yandex',
             temperature: 0.7,
             maxTokens: 1000
-          }
+          }]
         }
       },
       include: {

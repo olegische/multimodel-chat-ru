@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ProviderType } from '@/providers/factory';
+import { getProviderDisplayName } from '@/config/providers';
 
 interface ProviderSelectorProps {
   selectedProvider: ProviderType;
@@ -68,7 +69,7 @@ export default function ProviderSelector({
         ) : (
           providers.map(({ id, status }) => (
             <option key={id} value={id} disabled={!status.available}>
-              {id} {!status.available && '(недоступен)'}
+              {getProviderDisplayName(id)} {!status.available && '(недоступен)'}
             </option>
           ))
         )}

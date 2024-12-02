@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ProviderType } from '@/providers/factory';
 import { GENERATION_CONFIG } from '@/config/generation';
+import { getProviderDisplayName } from '@/config/providers';
 
 interface FooterProps {
   provider: ProviderType;
@@ -37,7 +38,7 @@ export default function Footer({
           className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           disabled={disabled}
         >
-          <span>Настройки {provider}</span>
+          <span>Настройки {getProviderDisplayName(provider)}</span>
           <span className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}>
             ▼
           </span>

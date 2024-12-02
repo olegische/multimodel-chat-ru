@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { Message } from '@prisma/client';
 import { ProviderType } from '@/providers/factory';
+import { getProviderDisplayName, PROVIDER_CONFIG } from '@/config/providers';
 
 interface ChatWindowProps {
   messages: Message[];
@@ -62,27 +63,32 @@ const UserMessage = ({ message }: { message: string }) => (
 );
 
 // Компонент ответа провайдера
-const ProviderResponse = ({ response, model, provider, currentProvider }: { response: string; model?: string | null; provider?: string | null; currentProvider: ProviderType }) => (
-  <div className="flex justify-start">
-    <div className="inline-block max-w-[80%] p-4 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 group">
-      <div className="text-sm mb-1">{provider || currentProvider}</div>
-      <div className="whitespace-pre-wrap break-words" data-testid="provider-response">
-        {response}
-      </div>
-      <div className="mt-2 flex items-center justify-between">
-        {model && (
-          <div className="text-xs opacity-70">
-            Модель: {model}
-          </div>
-        )}
-        <CopyButton text={response} />
+const ProviderResponse = ({ response, model, provider, currentProvider }: { response: string; model?: string | null; provider: string; currentProvider: ProviderType }) => {
+  // Используем currentProvider как fallback, если provider не является валидным ProviderType
+  const displayProvider = (PROVIDER_CONFIG[provider as ProviderType] ? provider : currentProvider) as ProviderType;
+  
+  return (
+    <div className="flex justify-start">
+      <div className="inline-block max-w-[80%] p-4 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 group">
+        <div className="text-sm mb-1">{getProviderDisplayName(displayProvider)}</div>
+        <div className="whitespace-pre-wrap break-words" data-testid="provider-response">
+          {response}
+        </div>
+        <div className="mt-2 flex items-center justify-between">
+          {model && (
+            <div className="text-xs opacity-70">
+              Модель: {model}
+            </div>
+          )}
+          <CopyButton text={response} />
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Компонент сообщения с ответом
-const MessageWithResponse = ({ message, response, model, provider, currentProvider }: { message: string; response?: string | null; model?: string | null; provider?: string | null; currentProvider: ProviderType }) => (
+const MessageWithResponse = ({ message, response, model, provider, currentProvider }: { message: string; response?: string | null; model?: string | null; provider: string; currentProvider: ProviderType }) => (
   <div className="space-y-4">
     <UserMessage message={message} />
     {response && (
@@ -100,7 +106,7 @@ const MessageWithResponse = ({ message, response, model, provider, currentProvid
 const LoadingIndicator = ({ provider }: { provider: ProviderType }) => (
   <div className="flex justify-center items-center py-4">
     <div className="animate-pulse text-gray-500 dark:text-gray-400">
-      {provider} печатает...
+      {getProviderDisplayName(provider)} печатает...
     </div>
   </div>
 );

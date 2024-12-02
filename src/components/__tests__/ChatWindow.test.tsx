@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider } from 'next-themes';
 import ChatWindow from '../ChatWindow';
 import { Message } from '@prisma/client';
+import { getProviderDisplayName } from '@/config/providers';
 
 // Mock clipboard API
 Object.assign(navigator, {
@@ -21,7 +22,7 @@ describe('ChatWindow', () => {
     temperature: 0.3,
     maxTokens: 2000,
     timestamp: new Date()
-  }] as unknown as Message[];
+  }] as Message[];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,7 +83,7 @@ describe('ChatWindow', () => {
       </ThemeProvider>
     );
 
-    expect(screen.getByText('yandex печатает...')).toBeInTheDocument();
+    expect(screen.getByText(`${getProviderDisplayName('yandex')} печатает...`)).toBeInTheDocument();
   });
 
   it('should show error state', () => {
@@ -103,7 +104,7 @@ describe('ChatWindow', () => {
       </ThemeProvider>
     );
 
-    expect(screen.getByText('yandex')).toBeInTheDocument();
+    expect(screen.getByText(getProviderDisplayName('yandex'))).toBeInTheDocument();
     expect(screen.getByText('Вы')).toBeInTheDocument();
   });
 

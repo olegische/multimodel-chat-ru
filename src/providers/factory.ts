@@ -11,9 +11,11 @@ export class ProviderFactory {
     switch (type) {
       case 'yandex':
         console.log('Creating YandexGPT provider with URL:', process.env.YANDEX_GPT_API_URL);
+        const yandexUrl = process.env.YANDEX_GPT_API_URL?.replace(/"/g, '') || '';
+        const yandexKey = process.env.YANDEX_API_KEY?.replace(/"/g, '') || '';
         return new YandexGPTProvider({
-          apiUrl: process.env.YANDEX_GPT_API_URL!,
-          credentials: process.env.YANDEX_API_KEY!,
+          apiUrl: yandexUrl,
+          credentials: yandexKey,
           systemPrompt: 'yandex'
         });
       case 'gigachat':
@@ -25,9 +27,11 @@ export class ProviderFactory {
           });
           throw new Error('Missing GigaChat configuration');
         }
+        const gigachatUrl = process.env.GIGACHAT_API_URL.replace(/"/g, '');
+        const gigachatCreds = process.env.GIGACHAT_CREDENTIALS.replace(/"/g, '');
         return new GigaChatProvider({
-          apiUrl: process.env.GIGACHAT_API_URL,
-          credentials: process.env.GIGACHAT_CREDENTIALS,
+          apiUrl: gigachatUrl,
+          credentials: gigachatCreds,
           systemPrompt: 'gigachat'
         });
       default:

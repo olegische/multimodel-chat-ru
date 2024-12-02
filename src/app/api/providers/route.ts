@@ -1,7 +1,6 @@
-import { NextRequest } from 'next/server';
 import { ProviderService } from '@/services/provider.service';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const providers = await ProviderService.getAvailableProviders();
     const providerStatuses = providers.map(provider => ({

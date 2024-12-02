@@ -44,8 +44,9 @@ export class YandexGPTProvider extends BaseProvider {
         text: msg.content
       }));
 
+      const folderId = process.env.YANDEX_FOLDER_ID?.replace(/"/g, '') || '';
       const requestBody = {
-        modelUri: `gpt://${process.env.YANDEX_FOLDER_ID}/yandexgpt-lite/latest`,
+        modelUri: `gpt://${folderId}/yandexgpt-lite/latest`,
         messages: yandexMessages,
         completionOptions: {
           stream: false,
