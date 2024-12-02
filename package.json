@@ -11,6 +11,7 @@
     "type-check": "tsc --noEmit",
     "test:db": "tsx src/scripts/test-db.ts",
     "test:gigachat": "tsx src/scripts/test-gigachat.ts",
+    "test:yandex": "tsx src/scripts/test-yandex.ts",
     "test": "jest --config jest.config.ts",
     "test:watch": "jest --watch"
   },
